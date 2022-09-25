@@ -1,0 +1,21 @@
+{
+    "id": "Travel1",
+    "type": "Travel",
+    "title": "Mi Viaje",
+    "startDate": "2022-09-24",
+    "endDate": "2022-09-30",
+    "budget": 1500.00,
+    "expenses": [
+        {
+            "type":"Expense",
+            "title": "Papitas",
+            "currency": "ARS",
+            "amount": 200,
+            "category": "Food",
+            "paymentMethod": "Cash",
+            "date": "2022-09-24",
+            "tags": [],
+            "image": []
+        }        
+    ]
+}
