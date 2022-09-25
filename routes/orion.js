@@ -46,7 +46,7 @@ router.post('/travels/:id/expenses', async function(req, res, next) {
   }
 });
 
-/* Get expense */
+/* Get expense in Travel */
 router.get('/travels/:traId/expenses/:expId', async function(req, res, next) {
   try {
     let result = await Orion.getExpense(req.params.traId, req.params.expId);
@@ -57,7 +57,18 @@ router.get('/travels/:traId/expenses/:expId', async function(req, res, next) {
   }
 });
 
-/* Delete expense */
+/* Update expense in Travel */
+router.get('/travels/:traId/expenses/:expId', async function(req, res, next) {
+  try {
+    let result = await Orion.updateExpense(req.params.traId, req.params.expId, req.body);
+    res.json(result);
+  }
+  catch (error) {
+    res.status(error.code).send(error.message)
+  }
+});
+
+/* Delete expense in Travel */
 router.delete('/travels/:traId/expenses/:expId', async function(req, res, next) {
   try {
     let result = await Orion.removeExpense(req.params.traId, req.params.expId);
@@ -67,8 +78,6 @@ router.delete('/travels/:traId/expenses/:expId', async function(req, res, next) 
     res.status(error.code).send(error.message)
   }
 });
-
-
 
 // router.get('/expenses/:id', async function(req, res, next) {
 //   Orion.storeTravel(req.body)

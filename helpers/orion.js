@@ -91,7 +91,12 @@ async function storeExpense(travelId, expense)
 
 async function updateExpense(travelId, expenseId, attributes)
 {
-    axios.put(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}/${ORION_ATTRIBUTES_CONTROLLER}`, attributes)
+    //TODO:
+    /* fetch all */
+    /* change matching expense */
+    /* update expenses attribute in travel */
+
+    axios.put(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${travelId}/${ORION_ATTRIBUTES_CONTROLLER}`, attributes)
     .then(res => {
         console.log(`statusCode: ${res.status}`);        
       })
@@ -229,4 +234,4 @@ function adaptExpense(expense)
     }
 }
 
-module.exports = { getTravels, getTravel, storeTravel, updateTravel, storeExpense, getExpense,  removeExpense }
+module.exports = { getTravels, getTravel, storeTravel, updateTravel, storeExpense, getExpense, updateExpense, removeExpense }
