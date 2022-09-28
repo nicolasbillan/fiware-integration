@@ -13,7 +13,7 @@ router.get('/travels', async function (req, res, next) {
   try {
     res.json(await Orion.getTravels());
   } catch (error) {
-    res.status(error.code).send(error.message);
+    res.status(error.code ?? 500).send(error.message);
   }
 });
 
@@ -23,17 +23,17 @@ router.get('/travels/:id', async function (req, res, next) {
     let result = await Orion.getTravel(req.params.id);
     res.json(result);
   } catch (error) {
-    res.status(error.code).send(error.message);
+    res.status(error.code ?? 500).send(error.message);
   }
 });
 
 /* Create Travel */
 router.post('/travels', async function (req, res, next) {
   try {
-    let result = await Orion.storeTravel(req.body);
-    res.json(result);
+    await Orion.storeTravel(req.body);
+    res.send('Travel created');
   } catch (error) {
-    res.status(error.code).send(error.message);
+    res.status(error.code ?? 500).send(error.message);
   }
 });
 
@@ -43,7 +43,7 @@ router.put('/travels/:id', async function (req, res, next) {
     await Orion.updateTravel(req.params.id, req.body);
     res.send('Travel updated');
   } catch (error) {
-    res.status(error.code).send(error.message);
+    res.status(error.code ?? 500).send(error.message);
   }
 });
 
@@ -53,7 +53,7 @@ router.delete('/travels/:id', async function (req, res, next) {
     await Orion.deleteTravel(req.params.id);
     res.send('Travel deleted');
   } catch (error) {
-    res.status(error.code).send(error.message);
+    res.status(error.code ?? 500).send(error.message);
   }
 });
 
@@ -65,7 +65,7 @@ router.get('/travels/:id/expenses/', async function (req, res, next) {
     let result = await Orion.getExpenses(req.params.id);
     res.json(result);
   } catch (error) {
-    res.status(error.code).send(error.message);
+    res.status(error.code ?? 500).send(error.message);
   }
 });
 
@@ -75,7 +75,7 @@ router.get('/travels/:traId/expenses/:expId', async function (req, res, next) {
     let result = await Orion.getExpense(req.params.traId, req.params.expId);
     res.json(result);
   } catch (error) {
-    res.status(error.code).send(error.message);
+    res.status(error.code ?? 500).send(error.message);
   }
 });
 
@@ -85,7 +85,7 @@ router.post('/travels/:id/expenses', async function (req, res, next) {
     await Orion.storeExpense(req.params.id, req.body);
     res.send('Expense created');
   } catch (error) {
-    res.status(error.code).send(error.message);
+    res.status(error.code ?? 500).send(error.message);
   }
 });
 
@@ -99,7 +99,7 @@ router.put('/travels/:traId/expenses/:expId', async function (req, res, next) {
     );
     res.json(result);
   } catch (error) {
-    res.status(error.code).send(error.message);
+    res.status(error.code ?? 500).send(error.message);
   }
 });
 
@@ -114,7 +114,7 @@ router.delete(
       );
       res.send(result);
     } catch (error) {
-      res.status(error.code).send(error.message);
+      res.status(error.code ?? 500).send(error.message);
     }
   }
 );
