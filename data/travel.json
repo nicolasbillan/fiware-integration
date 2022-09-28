@@ -7,7 +7,7 @@
     "budget": 1500.00,
     "expenses": [
         {
-            "type":"Expense",
+            "type": "Expense",
             "title": "Papitas",
             "currency": "ARS",
             "amount": 200,
@@ -16,6 +16,6 @@
             "date": "2022-09-24",
             "tags": [],
             "image": []
-        }        
+        }
     ]
 }

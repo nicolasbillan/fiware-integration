@@ -1,237 +1,291 @@
-const { render } = require("jade");
-const axios = require("axios").default;
+const axios = require('axios').default;
+const crypto = require('crypto');
 
-const ORION_LOCAL_API_URL = "http://localhost:1026/v2/";
-const ORION_ENTITIES_CONTROLLER = 'entities'
-const ORION_ATTRIBUTES_CONTROLLER = 'attrs'
+const ORION_LOCAL_API_URL = 'http://localhost:1026/v2/';
+const ORION_ENTITIES_CONTROLLER = 'entities';
+const ORION_ATTRIBUTES_CONTROLLER = 'attrs';
 
-const EXPENSE_MOCK_DATA  = {
-    title: 'Papitas',
-    currency: 'ARS',
-    amount: 200,
-    category: 'Comida',
-    paymentMethod: 'Cash',
-    date: '2022-09-24',
-    tags: [],
-    location: {
-        lat: -34.501866976757505,
-        long: -58.495183525370386
-    },
-    image: []
-}
+const EXPENSE_MOCK_DATA = {
+  title: 'Papitas',
+  currency: 'ARS',
+  amount: 200,
+  category: 'Comida',
+  paymentMethod: 'Cash',
+  date: '2022-09-24',
+  tags: [],
+  location: {
+    lat: -34.501866976757505,
+    long: -58.495183525370386,
+  },
+  image: [],
+};
 
 const TRAVEL_MOCK_DATA = {
-    id: 'Travel1',
-    type: 'Travel',
-    title: 'Mi Viaje',
-    startDate: '2022-09-24',
-    endDate: '2022-09-30',
-    budget: 1500.00,
-    expenses: [
-        EXPENSE_MOCK_DATA
-    ]
+  id: 'Travel1',
+  type: 'Travel',
+  title: 'Mi Viaje',
+  startDate: '2022-09-24',
+  endDate: '2022-09-30',
+  budget: 1500.0,
+  expenses: [EXPENSE_MOCK_DATA],
+};
+
+function generateId() {
+  return crypto.randomUUID();
 }
 
-function generateId()
-{
-    //TODO: how to generate unique ids?
-    return 1;
-}
-
-async function storeTravel(travel)
-{
-    travel = adaptTravel(travel);
-
-    travel = {
-        id: "Travel" + generateId(),
-        type: "Travel",
-        ...travel              
-    }
-
-    console.log(JSON.stringify(travel));
-
-    return axios.post(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}`, travel)
-    .then(res => {
-        console.log(`statusCode: ${res.status}`);
-        return res.data;
+async function storeTravel(travel) {
+  return axios
+    .post(
+      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}`,
+      createTravel(travel)
+    )
+    .then((res) => {
+      return res.data;
     })
-    .catch(e => {
-        console.log(e);
-        return e;
+    .catch((e) => {
+      throw { code: e.response.status, message: e.response.statusText };
     });
 }
 
-function updateTravel(id, attributes)
-{
-    axios.put(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}/${ORION_ATTRIBUTES_CONTROLLER}`, attributes)
-    .then(res => {
-        console.log(`statusCode: ${res.status}`);        
-      })
-    .catch(e => console.log(e))
+async function updateTravel(id, attributes) {
+  return axios
+    .post(
+      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}/${ORION_ATTRIBUTES_CONTROLLER}`,
+      formatAttributes(attributes)
+    )
+    .then((res) => {
+      console.log(`statusCode: ${res.status}`);
+    })
+    .catch((e) => {
+      throw { code: e.response.status, message: e.response.statusText };
+    });
 }
 
-async function storeExpense(travelId, expense)
-{
-    let expenses = await getExpensesFromTravel(travelId);
-
-    expense = adaptExpense(expense)
-    
-    expense = {
-        id: "Expense" + expenses.value.length,
-        type: "Expense",
-        ...expense        
-    }
-
-    expenses.value.push(expense);
-
-    await axios.put(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${travelId}/${ORION_ATTRIBUTES_CONTROLLER}/expenses`, expenses)
-    .then(res => { console.log(`statusCode: ${res.status}`); })
-    .catch(e => console.log(e))
+async function deleteTravel(id) {
+  return axios
+    .delete(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}`)
+    .then((res) => {
+      console.log(`statusCode: ${res.status}`);
+    })
+    .catch((e) => {
+      throw { code: e.response.status, message: e.response.statusText };
+    });
 }
 
-async function updateExpense(travelId, expenseId, attributes)
-{
-    //TODO:
-    /* fetch all */
-    /* change matching expense */
-    /* update expenses attribute in travel */
+async function storeExpense(travelId, expense) {
+  let expenses = await getExpensesFromTravel(travelId);
 
-    axios.put(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${travelId}/${ORION_ATTRIBUTES_CONTROLLER}`, attributes)
-    .then(res => {
-        console.log(`statusCode: ${res.status}`);        
-      })
-    .catch(e => console.log(e))
+  expense = adaptExpense(expense);
+
+  expense = {
+    id: 'Expense' + expenses.value.length,
+    type: 'Expense',
+    ...expense,
+  };
+
+  expenses.value.push(expense);
+
+  await axios
+    .put(
+      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${travelId}/${ORION_ATTRIBUTES_CONTROLLER}/expenses`,
+      expenses
+    )
+    .then((res) => {
+      console.log(`statusCode: ${res.status}`);
+    })
+    .catch((e) => console.log(e));
 }
 
-async function removeExpense(travelId, expenseId)
-{
-    let expenses = await getExpensesFromTravel(travelId);
-    
-    expenses.value = expenses.value.filter(v => v.id != expenseId);
+async function updateExpense(travelId, expenseId, attributes) {
+  //TODO:
+  /* fetch all */
+  /* change matching expense */
+  /* update expenses attribute in travel */
 
-    let result = await axios.put(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${travelId}/${ORION_ATTRIBUTES_CONTROLLER}/expenses`, expenses)
-                .then(res => { console.log(`statusCode: ${res.status}`); })
-                .catch(e => { throw { code: e.response.status, message: e.response.statusText } });
-
-    // console.log(result);        
+  axios
+    .put(
+      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${travelId}/${ORION_ATTRIBUTES_CONTROLLER}`,
+      attributes
+    )
+    .then((res) => {
+      console.log(`statusCode: ${res.status}`);
+    })
+    .catch((e) => console.log(e));
 }
 
-async function getExpense(travelId, expenseId)
-{
-    let expenses = await getExpensesFromTravel(travelId);
-    
-    let result = expenses.value.find(v => v.id == expenseId);
+async function removeExpense(travelId, expenseId) {
+  let expenses = await getExpensesFromTravel(travelId);
 
-    if(result)
-    {
-        return result;
-    }
+  expenses.value = expenses.value.filter((v) => v.id != expenseId);
 
-    throw { code: 404, message: "Expense Not Found"} 
+  await axios
+    .put(
+      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${travelId}/${ORION_ATTRIBUTES_CONTROLLER}/expenses`,
+      expenses
+    )
+    .then((res) => {
+      console.log(`statusCode: ${res.status}`);
+    })
+    .catch((e) => {
+      throw { code: e.response.status, message: e.response.statusText };
+    });
 }
 
-async function getTravel(id)
-{
-    return axios.get(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}`)
-    .then(res => { return res.data; })
-    .catch(e => { throw { code: e.response.status, message: e.response.message } });
-}
+async function getExpense(travelId, expenseId) {
+  let expenses = await getExpensesFromTravel(travelId);
 
-async function getTravels()
-{
-    return axios.get(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}?type=Travel`)
-    .then(res => {
-        console.log(res.data);
-        return res.data;
-      })
-    .catch(e => console.log(e))
-}
+  let result = expenses.value.find((v) => v.id == expenseId);
 
-async function getExpensesFromTravel(id)
-{
-    return getAttributeValue(id, 'expenses');
-}
-
-async function getAttributeValue(id, attrName)
-{
-    let result = await axios.get(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}/${ORION_ATTRIBUTES_CONTROLLER}/${attrName}`)
-        .then(res => { return res.data; })  
-        .catch(e => { throw { code: e.response.status, message: e.response.statusText } });
-
+  if (result) {
     return result;
+  }
+
+  throw { code: 404, message: 'Expense Not Found' };
 }
 
-function adaptTravel(travel)
-{
-    return travel = {
-        startDate: {
-            type: "Datetime",
-            value: travel.startDate
-        },
-        endDate: {
-            type: "Datetime",
-            value: travel.endDate
-        },
-        title: {
-            type: "Text",
-            value: travel.title
-        },
-        budget: {
-            type: "Float",
-            value: travel.budget
-        },
-    }
+async function getExpenses(travelId) {
+  //TODO: filter
+  return await getExpensesFromTravel(travelId);
 }
 
-function convertTravel(travel)
-{
-    let converted = {};
-
-    if (travel.startDate)
-    {
-        converted.startDate = {  
-            type: "Datetime",
-            value: travel.startDate
-        }
-    }
-
-    return converted;
+async function getTravel(id) {
+  return axios
+    .get(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}`)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((e) => {
+      throw { code: e.response.status, message: e.response.message };
+    });
 }
 
-function adaptExpense(expense)
-{
-    return expense = {
-        title: {
-            type: "Text",
-            value: expense.title
-        },        
-        amount: {
-            type: "Float",
-            value: expense.amount
-        },
-        date: {
-            type: "Datetime",
-            value: expense.date
-        },
-        location: {
-            type: "geo:point",
-            value: `${expense.location.lat}, ${expense.location.long}`
-        },
-
-        currency: {
-            type: "Text", //TODO check type
-            value: expense.currency
-        },
-        category: {
-            type: "Text", //TODO check type
-            value: expense.category
-        },
-        paymentMethod: {
-            type: "Text", //TODO check type
-            value: expense.paymentMethod
-        },
-        //tags: [],        
-    }
+async function getTravels() {
+  //TODO: filters
+  return axios
+    .get(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}?type=Travel`)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((e) => {
+      throw { code: e.response.status, message: e.response.message };
+    });
 }
 
-module.exports = { getTravels, getTravel, storeTravel, updateTravel, storeExpense, getExpense, updateExpense, removeExpense }
+async function getExpensesFromTravel(id) {
+  return getAttributeValue(id, 'expenses');
+}
+
+async function getAttributeValue(id, attrName) {
+  let result = await axios
+    .get(
+      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}/${ORION_ATTRIBUTES_CONTROLLER}/${attrName}`
+    )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((e) => {
+      throw { code: e.response.status, message: e.response.statusText };
+    });
+
+  return result;
+}
+
+function createTravel(attributes) {
+  attributes.expenses = [];
+
+  return {
+    id: generateId(),
+    type: 'Travel',
+    ...formatAttributes(attributes),
+  };
+}
+
+/// Parse travel dto into orion's (context broker) accepted format and also purges unwanted attributes
+function formatAttributes(travel) {
+  let converted = {};
+
+  if (travel.title) {
+    converted.title = {
+      type: 'Text',
+      value: travel.title,
+    };
+  }
+
+  if (travel.budget) {
+    converted.budget = {
+      type: 'Float',
+      value: travel.budget,
+    };
+  }
+
+  if (travel.startDate) {
+    converted.startDate = {
+      type: 'Datetime',
+      value: travel.startDate,
+    };
+  }
+
+  if (travel.endDate) {
+    converted.endDate = {
+      type: 'Datetime',
+      value: travel.endDate,
+    };
+  }
+
+  if (travel.expenses) {
+    converted.expenses = {
+      type: 'StructuredValue',
+      value: travel.expenses,
+    };
+  }
+
+  return converted;
+}
+
+function adaptExpense(expense) {
+  return (expense = {
+    title: {
+      type: 'Text',
+      value: expense.title,
+    },
+    amount: {
+      type: 'Float',
+      value: expense.amount,
+    },
+    date: {
+      type: 'Datetime',
+      value: expense.date,
+    },
+    location: {
+      type: 'geo:point',
+      value: `${expense.location.lat}, ${expense.location.long}`,
+    },
+    currency: {
+      type: 'Text', //TODO check type
+      value: expense.currency,
+    },
+    category: {
+      type: 'Text', //TODO check type
+      value: expense.category,
+    },
+    paymentMethod: {
+      type: 'Text', //TODO check type
+      value: expense.paymentMethod,
+    },
+    //tags: [],
+  });
+}
+
+module.exports = {
+  getTravels,
+  getTravel,
+  storeTravel,
+  updateTravel,
+  deleteTravel,
+  storeExpense,
+  getExpense,
+  getExpenses,
+  updateExpense,
+  removeExpense,
+};
