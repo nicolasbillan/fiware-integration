@@ -1,76 +1,31 @@
-const axios = require('axios').default;
 const crypto = require('crypto');
-
-const ORION_LOCAL_API_URL = 'http://localhost:1026/v2/';
-const ORION_ENTITIES_CONTROLLER = 'entities';
-const ORION_ATTRIBUTES_CONTROLLER = 'attrs';
-
-const EXPENSE_MOCK_DATA = {
-  title: 'Papitas',
-  currency: 'ARS',
-  amount: 200,
-  category: 'Comida',
-  paymentMethod: 'Cash',
-  date: '2022-09-24',
-  tags: [],
-  location: {
-    lat: -34.501866976757505,
-    long: -58.495183525370386,
-  },
-  image: [],
-};
-
-const TRAVEL_MOCK_DATA = {
-  id: 'Travel1',
-  type: 'Travel',
-  title: 'Mi Viaje',
-  startDate: '2022-09-24',
-  endDate: '2022-09-30',
-  budget: 1500.0,
-  expenses: [EXPENSE_MOCK_DATA],
-};
+const Orion = require('../helpers/orion');
+const { MESSAGES } = require('../constants/messages');
 
 function generateId() {
   return crypto.randomUUID();
 }
 
+//TRAVELS
+
+async function getTravel(id) {
+  return await Orion.getEntity(id);
+}
+
+async function getTravels() {
+  return await Orion.getEntities({ type: 'Travel' });
+}
+
 async function storeTravel(travel) {
-  return axios
-    .post(
-      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}`,
-      createTravel(travel)
-    )
-    .then((res) => {
-      return res.data;
-    })
-    .catch((e) => {
-      throw { code: e.response.status, message: e.response.statusText };
-    });
+  await Orion.createEntity(createTravel(travel));
 }
 
 async function updateTravel(id, attributes) {
-  return axios
-    .post(
-      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}/${ORION_ATTRIBUTES_CONTROLLER}`,
-      formatAttributes(attributes)
-    )
-    .then((res) => {
-      console.log(`statusCode: ${res.status}`);
-    })
-    .catch((e) => {
-      throw { code: e.response.status, message: e.response.statusText };
-    });
+  await Orion.updateEntity(id, formatAttributes(attributes));
 }
 
 async function deleteTravel(id) {
-  return axios
-    .delete(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}`)
-    .then((res) => {
-      console.log(`statusCode: ${res.status}`);
-    })
-    .catch((e) => {
-      throw { code: e.response.status, message: e.response.statusText };
-    });
+  await Orion.deleteEntity(id);
 }
 
 async function storeExpense(travelId, expense) {
@@ -86,32 +41,23 @@ async function storeExpense(travelId, expense) {
 
   expenses.value.push(expense);
 
-  await axios
-    .put(
-      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${travelId}/${ORION_ATTRIBUTES_CONTROLLER}/expenses`,
-      expenses
-    )
-    .then((res) => {
-      console.log(`statusCode: ${res.status}`);
-    })
-    .catch((e) => console.log(e));
+  return await Orion.updateAttribute(travelId, 'expenses', expenses);
 }
 
 async function updateExpense(travelId, expenseId, attributes) {
-  //TODO:
-  /* fetch all */
-  /* change matching expense */
-  /* update expenses attribute in travel */
+  let expenses = await getExpensesFromTravel(travelId);
 
-  axios
-    .put(
-      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${travelId}/${ORION_ATTRIBUTES_CONTROLLER}`,
-      attributes
-    )
-    .then((res) => {
-      console.log(`statusCode: ${res.status}`);
-    })
-    .catch((e) => console.log(e));
+  let expense = expenses.value.find((e) => e.id == expenseId);
+
+  if (!expense) {
+    throw { code: 404, message: MESSAGES.EXPENSE_NOT_FOUND };
+  }
+
+  //TODO:
+  //compose new expense with old + new attributes
+  //swap expenses from collection
+
+  return await Orion.updateAttribute(travelId, 'expenses', expenses);
 }
 
 async function removeExpense(travelId, expenseId) {
@@ -119,17 +65,7 @@ async function removeExpense(travelId, expenseId) {
 
   expenses.value = expenses.value.filter((v) => v.id != expenseId);
 
-  await axios
-    .put(
-      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${travelId}/${ORION_ATTRIBUTES_CONTROLLER}/expenses`,
-      expenses
-    )
-    .then((res) => {
-      console.log(`statusCode: ${res.status}`);
-    })
-    .catch((e) => {
-      throw { code: e.response.status, message: e.response.statusText };
-    });
+  return await Orion.updateAttribute(travelId, 'expenses', expenses);
 }
 
 async function getExpense(travelId, expenseId) {
@@ -149,46 +85,9 @@ async function getExpenses(travelId) {
   return await getExpensesFromTravel(travelId);
 }
 
-async function getTravel(id) {
-  return axios
-    .get(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}`)
-    .then((res) => {
-      return res.data;
-    })
-    .catch((e) => {
-      throw { code: e.response.status, message: e.response.message };
-    });
-}
-
-async function getTravels() {
-  //TODO: filters
-  return axios
-    .get(`${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}?type=Travel`)
-    .then((res) => {
-      return res.data;
-    })
-    .catch((e) => {
-      throw { code: e.response.status, message: e.response.message };
-    });
-}
-
 async function getExpensesFromTravel(id) {
-  return getAttributeValue(id, 'expenses');
-}
-
-async function getAttributeValue(id, attrName) {
-  let result = await axios
-    .get(
-      `${ORION_LOCAL_API_URL}${ORION_ENTITIES_CONTROLLER}/${id}/${ORION_ATTRIBUTES_CONTROLLER}/${attrName}`
-    )
-    .then((res) => {
-      return res.data;
-    })
-    .catch((e) => {
-      throw { code: e.response.status, message: e.response.statusText };
-    });
-
-  return result;
+  //TODO: filter expenses in-memory
+  return Orion.getAttribute(id, 'expenses');
 }
 
 function createTravel(attributes) {

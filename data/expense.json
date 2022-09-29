@@ -1,0 +1,14 @@
+{
+    "title": "Papitas",
+    "currency": "ARS",
+    "amount": 200,
+    "category": "Comida",
+    "paymentMethod": "Cash",
+    "date": "2022-09-24",
+    "tags": [],
+    "location": {
+        "lat": -34.501866976757505,
+        "long": -58.495183525370386
+    },
+    "image": []
+}

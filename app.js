@@ -5,7 +5,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 
 var indexRouter = require("./routes/index");
-var orionRouter = require("./routes/orion");
+var travelRouter = require("./routes/travels");
 var keyrockRouter = require("./routes/keyrock");
 
 var app = express();
@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/orion", orionRouter);
+app.use("/orion/travels", travelRouter);
 app.use("/keyrock", keyrockRouter);
 
 // catch 404 and forward to error handler

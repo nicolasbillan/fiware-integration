@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-const Orion = require('../helpers/orion');
+const Travels = require('../data/travel');
 const auth = require('../middleware/auth');
 
 //TODO: AUTH
@@ -9,18 +9,18 @@ const auth = require('../middleware/auth');
 //TRAVELS
 
 /* GET travels listing. */
-router.get('/travels', async function (req, res, next) {
+router.get('/', async function (req, res, next) {
   try {
-    res.json(await Orion.getTravels());
+    res.json(await Travels.getTravels());
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
   }
 });
 
 /* GET single Travel */
-router.get('/travels/:id', async function (req, res, next) {
+router.get('/:id', async function (req, res, next) {
   try {
-    let result = await Orion.getTravel(req.params.id);
+    let result = await Travels.getTravel(req.params.id);
     res.json(result);
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
@@ -28,9 +28,9 @@ router.get('/travels/:id', async function (req, res, next) {
 });
 
 /* Create Travel */
-router.post('/travels', async function (req, res, next) {
+router.post('/', async function (req, res, next) {
   try {
-    await Orion.storeTravel(req.body);
+    await Travels.storeTravel(req.body);
     res.send('Travel created');
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
@@ -38,9 +38,9 @@ router.post('/travels', async function (req, res, next) {
 });
 
 /* Update Travel */
-router.put('/travels/:id', async function (req, res, next) {
+router.put('/:id', async function (req, res, next) {
   try {
-    await Orion.updateTravel(req.params.id, req.body);
+    await Travels.updateTravel(req.params.id, req.body);
     res.send('Travel updated');
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
@@ -48,9 +48,9 @@ router.put('/travels/:id', async function (req, res, next) {
 });
 
 /* Delete Travel */
-router.delete('/travels/:id', async function (req, res, next) {
+router.delete('/:id', async function (req, res, next) {
   try {
-    await Orion.deleteTravel(req.params.id);
+    await Travels.deleteTravel(req.params.id);
     res.send('Travel deleted');
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
@@ -60,9 +60,9 @@ router.delete('/travels/:id', async function (req, res, next) {
 //EXPENSES
 
 /* Get all expenses in Travel */
-router.get('/travels/:id/expenses/', async function (req, res, next) {
+router.get('/:id/expenses/', async function (req, res, next) {
   try {
-    let result = await Orion.getExpenses(req.params.id);
+    let result = await Travels.getExpenses(req.params.id);
     res.json(result);
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
@@ -70,9 +70,9 @@ router.get('/travels/:id/expenses/', async function (req, res, next) {
 });
 
 /* Get expense in Travel */
-router.get('/travels/:traId/expenses/:expId', async function (req, res, next) {
+router.get('/:id/expenses/:expId', async function (req, res, next) {
   try {
-    let result = await Orion.getExpense(req.params.traId, req.params.expId);
+    let result = await Travels.getExpense(req.params.id, req.params.expId);
     res.json(result);
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
@@ -80,9 +80,9 @@ router.get('/travels/:traId/expenses/:expId', async function (req, res, next) {
 });
 
 /* Create expense in Travel */
-router.post('/travels/:id/expenses', async function (req, res, next) {
+router.post('/:id/expenses', async function (req, res, next) {
   try {
-    await Orion.storeExpense(req.params.id, req.body);
+    await Travels.storeExpense(req.params.id, req.body);
     res.send('Expense created');
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
@@ -90,10 +90,10 @@ router.post('/travels/:id/expenses', async function (req, res, next) {
 });
 
 /* Update expense in Travel */
-router.put('/travels/:traId/expenses/:expId', async function (req, res, next) {
+router.put('/:id/expenses/:expId', async function (req, res, next) {
   try {
-    let result = await Orion.updateExpense(
-      req.params.traId,
+    let result = await Travels.updateExpense(
+      req.params.id,
       req.params.expId,
       req.body
     );
@@ -104,19 +104,13 @@ router.put('/travels/:traId/expenses/:expId', async function (req, res, next) {
 });
 
 /* Delete expense in Travel */
-router.delete(
-  '/travels/:traId/expenses/:expId',
-  async function (req, res, next) {
-    try {
-      let result = await Orion.removeExpense(
-        req.params.traId,
-        req.params.expId
-      );
-      res.send(result);
-    } catch (error) {
-      res.status(error.code ?? 500).send(error.message);
-    }
+router.delete('/:id/expenses/:expId', async function (req, res, next) {
+  try {
+    let result = await Travels.removeExpense(req.params.id, req.params.expId);
+    res.send(result);
+  } catch (error) {
+    res.status(error.code ?? 500).send(error.message);
   }
-);
+});
 
 module.exports = router;
