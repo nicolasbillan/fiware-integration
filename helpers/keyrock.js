@@ -5,8 +5,8 @@ const KEYROCK_TOKENS_CONTROLLER = 'auth/tokens';
 const KEYROCK_USERS_CONTROLLER = 'users';
 
 const KEYROCK_ADMIN_USER_DATA = {
-  name: 'admin@test.com',
-  password: '1234',
+  name: process.env.KEYROCK_ADMIN_USER,
+  password: process.env.KEYROCK_ADMIN_PASSWORD,
 };
 
 const KEYROCK_MOCK_USER_CREATE = {
