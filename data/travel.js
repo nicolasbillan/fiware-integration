@@ -53,6 +53,8 @@ async function updateExpense(travelId, expenseId, attributes) {
     throw { code: 404, message: MESSAGES.EXPENSE_NOT_FOUND };
   }
 
+  
+
   //TODO:
   //compose new expense with old + new attributes
   //swap expenses from collection
