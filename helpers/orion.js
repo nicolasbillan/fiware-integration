@@ -32,13 +32,21 @@ async function getAttribute(id, attribute) {
 }
 
 async function getEntities(parameters) {
+  if (!parameters.type) {
+    throw { code: 400, message: 'Type filter missing' };
+  }
+
+  let url = `${ORION_LOCAL_API_URL}${ORION.ENTITIES_CONTROLLER}?type=${parameters.type}`;
+
+  if (parameters.email) {
+    url += `&q=email==${parameters.email}`;
+  }
+
   return axios
-    .get(
-      `${ORION_LOCAL_API_URL}${ORION.ENTITIES_CONTROLLER}?type=${parameters.type}`
-    )
+    .get(url)
     .then((res) => {
       return res.data;
-    })
+    })  
     .catch((e) => handleException(e));
 }
 

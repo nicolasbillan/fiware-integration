@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const Orion = require('../helpers/orion');
 const { MESSAGES } = require('../constants/messages');
+const { ORION } = require('../constants/orion');
 
 function generateId() {
   return crypto.randomUUID();
@@ -13,7 +14,7 @@ async function getTravel(id) {
 }
 
 async function getTravels() {
-  return await Orion.getEntities({ type: 'Travel' });
+  return await Orion.getEntities({ type: ORION.ENTITY_TYPE_TRAVEL });
 }
 
 async function storeTravel(travel) {
@@ -52,8 +53,6 @@ async function updateExpense(travelId, expenseId, attributes) {
   if (!expense) {
     throw { code: 404, message: MESSAGES.EXPENSE_NOT_FOUND };
   }
-
-  
 
   //TODO:
   //compose new expense with old + new attributes
@@ -97,7 +96,7 @@ function createTravel(attributes) {
 
   return {
     id: generateId(),
-    type: 'Travel',
+    type: ORION.ENTITY_TYPE_TRAVEL,
     ...formatAttributes(attributes),
   };
 }
@@ -108,35 +107,35 @@ function formatAttributes(travel) {
 
   if (travel.title) {
     converted.title = {
-      type: 'Text',
+      type: ORION.ATTRIBUTE_TYPE_STRING,
       value: travel.title,
     };
   }
 
   if (travel.budget) {
     converted.budget = {
-      type: 'Float',
+      type: ORION.ATTRIBUTE_TYPE_NUMBER,
       value: travel.budget,
     };
   }
 
   if (travel.startDate) {
     converted.startDate = {
-      type: 'Datetime',
+      type: ORION.ATTRIBUTE_TYPE_DATE,
       value: travel.startDate,
     };
   }
 
   if (travel.endDate) {
     converted.endDate = {
-      type: 'Datetime',
+      type: ORION.ATTRIBUTE_TYPE_DATE,
       value: travel.endDate,
     };
   }
 
   if (travel.expenses) {
     converted.expenses = {
-      type: 'StructuredValue',
+      type: ORION.ATTRIBUTE_TYPE_ARRAY,
       value: travel.expenses,
     };
   }
