@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const Orion = require('../helpers/orion');
+const Parser = require('../parsers/orion');
 const { MESSAGES } = require('../constants/messages');
 const { ORION } = require('../constants/orion');
 
@@ -10,11 +11,12 @@ function generateId() {
 //TRAVELS
 
 async function getTravel(id) {
-  return await Orion.getEntity(id);
+  return parseTravel(await Orion.getEntity(id));
 }
 
 async function getTravels() {
-  return await Orion.getEntities({ type: ORION.ENTITY_TYPE_TRAVEL });
+  let travels = await Orion.getEntities({ type: ORION.ENTITY_TYPE_TRAVEL });
+  return travels.map((t) => parseTravel(t));
 }
 
 async function storeTravel(travel) {
@@ -64,15 +66,23 @@ async function updateExpense(travelId, expenseId, attributes) {
 async function removeExpense(travelId, expenseId) {
   let expenses = await getExpensesFromTravel(travelId);
 
-  expenses.value = expenses.value.filter((v) => v.id != expenseId);
+  expenses = expenses
+    .filter((v) => v.id != expenseId)
+    .map((e) => adaptExpense(e));
 
-  return await Orion.updateAttribute(travelId, 'expenses', expenses);
+  console.log(expenses);
+
+  return await Orion.updateAttribute(
+    travelId,
+    ORION.ATTRIBUTE_NAME_EXPENSES,
+    expenses
+  );
 }
 
 async function getExpense(travelId, expenseId) {
   let expenses = await getExpensesFromTravel(travelId);
 
-  let result = expenses.value.find((v) => v.id == expenseId);
+  let result = expenses.find((v) => v.id == expenseId);
 
   if (result) {
     return result;
@@ -88,7 +98,8 @@ async function getExpenses(travelId) {
 
 async function getExpensesFromTravel(id) {
   //TODO: filter expenses in-memory
-  return Orion.getAttribute(id, 'expenses');
+  let expenses = await Orion.getAttribute(id, 'expenses');
+  return expenses.value.map((e) => Parser.parseExpense(e));
 }
 
 function createTravel(attributes) {
@@ -146,15 +157,15 @@ function formatAttributes(travel) {
 function adaptExpense(expense) {
   return (expense = {
     title: {
-      type: 'Text',
+      type: ORION.ATTRIBUTE_TYPE_STRING,
       value: expense.title,
     },
     amount: {
-      type: 'Float',
+      type: ORION.ATTRIBUTE_TYPE_NUMBER,
       value: expense.amount,
     },
     date: {
-      type: 'Datetime',
+      type: ORION.ATTRIBUTE_TYPE_DATE,
       value: expense.date,
     },
     location: {
@@ -162,18 +173,17 @@ function adaptExpense(expense) {
       value: `${expense.location.lat}, ${expense.location.long}`,
     },
     currency: {
-      type: 'Text', //TODO check type
+      type: ORION.ATTRIBUTE_TYPE_STRING,
       value: expense.currency,
     },
     category: {
-      type: 'Text', //TODO check type
+      type: ORION.ATTRIBUTE_TYPE_STRING,
       value: expense.category,
     },
     paymentMethod: {
-      type: 'Text', //TODO check type
+      type: ORION.ATTRIBUTE_TYPE_STRING,
       value: expense.paymentMethod,
     },
-    //tags: [],
   });
 }
 
