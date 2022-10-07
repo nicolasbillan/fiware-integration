@@ -59,7 +59,7 @@ services:
         - IDM_DB_USER=root
         - IDM_ADMIN_USER=admin
         - IDM_ADMIN_EMAIL=admin@test.com
-        - IDM_ADMIN_PASS=1234
+        - IDM_ADMIN_PASS=${KEYROCK_ADMIN_PASSWORD:-1234}
 
   # Databases - Orion uses Mongo-DB, Cygnus is persisting to Postgres, Keyrock relies on MySQL
   mongo-db:

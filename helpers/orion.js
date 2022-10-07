@@ -46,7 +46,7 @@ async function getEntities(parameters) {
     .get(url)
     .then((res) => {
       return res.data;
-    })  
+    })
     .catch((e) => handleException(e));
 }
 
