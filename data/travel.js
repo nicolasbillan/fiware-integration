@@ -11,12 +11,12 @@ function generateId() {
 //TRAVELS
 
 async function getTravel(id) {
-  return parseTravel(await Orion.getEntity(id));
+  return Parser.parseTravel(await Orion.getEntity(id));
 }
 
 async function getTravels() {
   let travels = await Orion.getEntities({ type: ORION.ENTITY_TYPE_TRAVEL });
-  return travels.map((t) => parseTravel(t));
+  return travels.map((t) => Parser.parseTravel(t));
 }
 
 async function storeTravel(travel) {
@@ -37,14 +37,18 @@ async function storeExpense(travelId, expense) {
   expense = adaptExpense(expense);
 
   expense = {
-    id: 'Expense' + expenses.value.length,
-    type: 'Expense',
+    id: ORION.ENTITY_TYPE_EXPENSE + expenses.length,
+    type: ORION.ENTITY_TYPE_EXPENSE,
     ...expense,
   };
 
   expenses.value.push(expense);
 
-  return await Orion.updateAttribute(travelId, 'expenses', expenses);
+  return await Orion.updateAttribute(
+    travelId,
+    ORION.ATTRIBUTE_NAME_EXPENSES,
+    expenses
+  );
 }
 
 async function updateExpense(travelId, expenseId, attributes) {
@@ -70,8 +74,6 @@ async function removeExpense(travelId, expenseId) {
     .filter((v) => v.id != expenseId)
     .map((e) => adaptExpense(e));
 
-  console.log(expenses);
-
   return await Orion.updateAttribute(
     travelId,
     ORION.ATTRIBUTE_NAME_EXPENSES,
@@ -82,10 +84,10 @@ async function removeExpense(travelId, expenseId) {
 async function getExpense(travelId, expenseId) {
   let expenses = await getExpensesFromTravel(travelId);
 
-  let result = expenses.find((v) => v.id == expenseId);
+  let result = expenses.value.find((v) => v.id == expenseId);
 
   if (result) {
-    return result;
+    return parseExpense(result);
   }
 
   throw { code: 404, message: 'Expense Not Found' };
@@ -93,13 +95,15 @@ async function getExpense(travelId, expenseId) {
 
 async function getExpenses(travelId) {
   //TODO: filter
-  return await getExpensesFromTravel(travelId);
+  return (await getExpensesFromTravel(travelId)).value.map((e) =>
+    Parser.parseExpense(e)
+  );
 }
 
 async function getExpensesFromTravel(id) {
   //TODO: filter expenses in-memory
-  let expenses = await Orion.getAttribute(id, 'expenses');
-  return expenses.value.map((e) => Parser.parseExpense(e));
+  let expenses = await Orion.getAttribute(id, ORION.ATTRIBUTE_NAME_EXPENSES);
+  return expenses;
 }
 
 function createTravel(attributes) {
