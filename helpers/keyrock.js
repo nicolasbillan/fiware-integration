@@ -25,8 +25,6 @@ function handleException(e) {
   };
 }
 
-let token = '';
-
 async function adminLogin() {
   return axios
     .post(
@@ -34,8 +32,7 @@ async function adminLogin() {
       KEYROCK_ADMIN_USER_DATA
     )
     .then((res) => {
-      token = res.headers[KEYROCK.TOKEN_RESPONSE_HEADER];
-      return token;
+      return res.headers[KEYROCK.TOKEN_RESPONSE_HEADER];
     })
     .catch((e) => handleException(e));
 }
@@ -86,45 +83,31 @@ function getUsers() {
 async function createUser(user) {
   return await adminLogin()
     .then((res) => {
-      let body = {
-        user: {
-          username: user.email,
-          email: user.email,
-          password: user.password,
-        },
-      };
-
       let config = { headers: {} };
-      config.headers[KEYROCK.TOKEN_REQUEST_HEADER] = token;
+      config.headers[KEYROCK.TOKEN_REQUEST_HEADER] = res;
 
       return axios.post(
         `${KEYROCK_API_URL}${KEYROCK.USERS_CONTROLLER}`,
-        body,
+        formatUser(user),
         config
       );
     })
-    .catch((e) => handleException(e));
-}
-
-function createUserPost(token) {
-  let config = {
-    headers: {
-      'X-Auth-token': token,
-    },
-  };
-
-  axios
-    .post(
-      `${KEYROCK_API_URL}${KEYROCK_USERS_CONTROLLER}`,
-      KEYROCK_MOCK_USER_CREATE,
-      config
-    )
     .then((res) => {
       console.log(`User created`);
       console.log(`statusCode: ${res.status}`);
       console.log('Response: ', res.data);
     })
-    .catch((e) => console.log(e));
+    .catch((e) => handleException(e));
+}
+
+function formatUser(user) {
+  return {
+    user: {
+      username: user.email,
+      email: user.email,
+      password: user.password,
+    },
+  };
 }
 
 module.exports = { getToken, validateToken, getUsers, createUser };
