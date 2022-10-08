@@ -128,6 +128,27 @@ function formatExpense(expense) {
   return formatted;
 }
 
+function formatUser(user) {
+  let formatted = {};
+
+  if (user.id) {
+    formatted.id = user.id;
+  }
+
+  if (user.type) {
+    formatted.type = user.type;
+  }
+
+  if (user.email) {
+    formatted.email = {
+      type: ORION.ATTRIBUTE_TYPE_STRING,
+      value: user.email,
+    };
+  }
+
+  return formatted;
+}
+
 function parseLocation(location) {
   let parts = location.split(',');
   return {
@@ -141,4 +162,5 @@ module.exports = {
   formatTravel,
   parseExpense,
   formatExpense,
+  formatUser,
 };

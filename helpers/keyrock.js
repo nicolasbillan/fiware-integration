@@ -97,7 +97,6 @@ async function createUser(user) {
     .then((res) => {
       console.log(`User created`);
       console.log(`statusCode: ${res.status}`);
-      console.log('Response: ', res.data);
     })
     .catch((e) => handleException(e));
 }

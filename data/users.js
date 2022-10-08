@@ -1,5 +1,7 @@
 const crypto = require('crypto');
 const Orion = require('../helpers/orion');
+const Keyrock = require('../helpers/keyrock');
+const Parser = require('../parsers/orion');
 const { MESSAGES } = require('../constants/messages');
 const { ORION } = require('../constants/orion');
 
@@ -16,20 +18,16 @@ async function getUserByEmail(email) {
     type: ORION.ENTITY_TYPE_USER,
     email: email,
   });
-  let user = result[0];
 
-  if (!user) {
-    throw { code: 404, message: 'User not found' };
-  }
-
-  return user;
+  return result[0];
 }
 
 async function storeUser(user) {
-  //check user in orion
-  //create user in keyrock
-  //create user in orion
-  await Orion.createEntity(createUser(user));
+  if (await getUserByEmail(user.email)) {
+    throw { code: 400, message: MESSAGES.EMAIL_ALREADY_IN_USE };
+  }
+
+  await Keyrock.createUser(user).then(Orion.createEntity(createUser(user)));
 }
 
 async function updateUser(id, attributes) {
@@ -40,10 +38,7 @@ function createUser(attributes) {
   return {
     id: generateId(),
     type: ORION.ENTITY_TYPE_USER,
-    email: {
-      type: 'Text',
-      value: attributes.email,
-    },
+    ...Parser.formatUser(attributes),
   };
 }
 

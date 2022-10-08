@@ -18,14 +18,11 @@ router.post('/login', async function (req, res) {
 });
 
 router.post('/register', async function (req, res) {
-  await Keyrock.createUser({
-    email: req.body.email,
-    password: req.body.password,
-  })
+  await Users.storeUser({ email: req.body.email, password: req.body.password })
     .then((result) => {
       res.send('user created');
     })
-    .catch((error) => res.status(error.code).send(error.message));
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 module.exports = router;

@@ -11,6 +11,8 @@ const MESSAGES = {
   EXPENSE_DELETED: 'Expense Deleted',
   TOKEN_NOT_FOUND: 'Token not found',
   USER_NOT_ALLOWED: 'User not allowed',
+  USER_NOT_FOUND: 'User not found',
+  EMAIL_ALREADY_IN_USE: 'Email already in use',
 };
 
 module.exports = { MESSAGES };
