@@ -5,8 +5,6 @@ const Travels = require('../data/travel');
 const auth = require('../middleware/auth');
 const { MESSAGES } = require('../constants/messages');
 
-//TODO: AUTH
-
 //TRAVELS
 
 /* GET travels listing. */
@@ -19,7 +17,7 @@ router.get('/', auth, async function (req, res, next) {
 });
 
 /* GET single Travel */
-router.get('/:id', async function (req, res, next) {
+router.get('/:id', auth, async function (req, res, next) {
   try {
     let result = await Travels.getTravel(req.params.id);
     res.json(result);
@@ -29,7 +27,7 @@ router.get('/:id', async function (req, res, next) {
 });
 
 /* Create Travel */
-router.post('/', async function (req, res, next) {
+router.post('/', auth, async function (req, res, next) {
   try {
     await Travels.storeTravel(req.body);
     res.send(MESSAGES.TRAVEL_CREATED);
@@ -39,7 +37,7 @@ router.post('/', async function (req, res, next) {
 });
 
 /* Update Travel */
-router.put('/:id', async function (req, res, next) {
+router.put('/:id', auth, async function (req, res, next) {
   try {
     await Travels.updateTravel(req.params.id, req.body);
     res.send(MESSAGES.TRAVEL_UPDATED);
@@ -49,7 +47,7 @@ router.put('/:id', async function (req, res, next) {
 });
 
 /* Delete Travel */
-router.delete('/:id', async function (req, res, next) {
+router.delete('/:id', auth, async function (req, res, next) {
   try {
     await Travels.deleteTravel(req.params.id);
     res.send(MESSAGES.TRAVEL_DELETED);
@@ -61,7 +59,7 @@ router.delete('/:id', async function (req, res, next) {
 //EXPENSES
 
 /* Get all expenses in Travel */
-router.get('/:id/expenses/', async function (req, res, next) {
+router.get('/:id/expenses/', auth, async function (req, res, next) {
   try {
     let result = await Travels.getExpenses(req.params.id);
     res.json(result);
@@ -71,7 +69,7 @@ router.get('/:id/expenses/', async function (req, res, next) {
 });
 
 /* Get expense in Travel */
-router.get('/:id/expenses/:expId', async function (req, res, next) {
+router.get('/:id/expenses/:expId', auth, async function (req, res, next) {
   try {
     let result = await Travels.getExpense(req.params.id, req.params.expId);
     res.json(result);
@@ -81,7 +79,7 @@ router.get('/:id/expenses/:expId', async function (req, res, next) {
 });
 
 /* Create expense in Travel */
-router.post('/:id/expenses', async function (req, res, next) {
+router.post('/:id/expenses', auth, async function (req, res, next) {
   try {
     await Travels.storeExpense(req.params.id, req.body);
     res.send(MESSAGES.EXPENSE_CREATED);
@@ -91,7 +89,7 @@ router.post('/:id/expenses', async function (req, res, next) {
 });
 
 /* Update expense in Travel */
-router.put('/:id/expenses/:expId', async function (req, res, next) {
+router.put('/:id/expenses/:expId', auth, async function (req, res, next) {
   try {
     await Travels.updateExpense(req.params.id, req.params.expId, req.body);
     res.send(MESSAGES.EXPENSE_UPDATED);
@@ -101,7 +99,7 @@ router.put('/:id/expenses/:expId', async function (req, res, next) {
 });
 
 /* Delete expense in Travel */
-router.delete('/:id/expenses/:expId', async function (req, res, next) {
+router.delete('/:id/expenses/:expId', auth, async function (req, res, next) {
   try {
     await Travels.removeExpense(req.params.id, req.params.expId);
     res.send(MESSAGES.EXPENSE_DELETED);
