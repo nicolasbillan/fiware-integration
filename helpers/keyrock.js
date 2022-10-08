@@ -39,27 +39,29 @@ async function adminLogin() {
 
 async function getToken(username, password) {
   return axios
-    .post(`${KEYROCK_API_URL}${KEYROCK_TOKENS_CONTROLLER}`, {
+    .post(`${KEYROCK_API_URL}${KEYROCK.TOKENS_CONTROLLER}`, {
       name: username,
       password: password,
     })
     .then((res) => {
       /* TODO: store token in app lifetime */
-      token = res.headers[KEYROCK.TOKEN_RESPONSE_HEADER];
-      console.log('Headers: ', JSON.stringify(token));
-      console.log('Response: ', res.data);
-      return { ...res.data.token, value: token };
+      return {
+        ...res.data.token,
+        value: res.headers[KEYROCK.TOKEN_RESPONSE_HEADER],
+      };
     })
     .catch((e) => handleException(e));
 }
 
 async function validateToken(token) {
   return axios
-    .post(`${KEYROCK_API_URL}${KEYROCK_TOKENS_CONTROLLER}`, { token: token })
+    .post(`${KEYROCK_API_URL}${KEYROCK.TOKENS_CONTROLLER}`, { token: token })
     .then((res) => {
       /* TODO: store token in app lifetime */
-      token = res.headers[KEYROCK.TOKEN_RESPONSE_HEADER];
-      return { ...res.data.token, value: token };
+      return {
+        ...res.data.token,
+        value: res.headers[KEYROCK.TOKEN_RESPONSE_HEADER],
+      };
     })
     .catch((e) => handleException(e));
 }

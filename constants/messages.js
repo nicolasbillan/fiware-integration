@@ -9,6 +9,8 @@ const MESSAGES = {
   EXPENSE_CREATED: 'Expense Created',
   EXPENSE_UPDATED: 'Expense Updated',
   EXPENSE_DELETED: 'Expense Deleted',
+  TOKEN_NOT_FOUND: 'Token not found',
+  USER_NOT_ALLOWED: 'User not allowed',
 };
 
 module.exports = { MESSAGES };

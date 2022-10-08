@@ -10,12 +10,12 @@ const { MESSAGES } = require('../constants/messages');
 //TRAVELS
 
 /* GET travels listing. */
-router.get('/', async function (req, res, next) {
-  try {
-    res.json(await Travels.getTravels());
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+router.get('/', auth, async function (req, res, next) {
+  return Travels.getTravels()
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 /* GET single Travel */

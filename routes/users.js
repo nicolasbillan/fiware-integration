@@ -3,6 +3,7 @@ var router = express.Router();
 
 const Keyrock = require('../helpers/keyrock');
 const Users = require('../data/users');
+const { MESSAGES } = require('../constants/messages');
 
 router.get('/:email', async function (req, res) {
   return Users.getUserByEmail(req.params.email)
@@ -22,7 +23,7 @@ router.post('/register', async function (req, res) {
     password: req.body.password,
   })
     .then((result) => {
-      res.send('User Created');
+      res.send('user created');
     })
     .catch((error) => res.status(error.code).send(error.message));
 });

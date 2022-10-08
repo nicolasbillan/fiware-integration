@@ -1,15 +1,27 @@
-const Keyrock = require("../helpers/keyrock");
+const { KEYROCK } = require('../constants/keyrock');
+const { MESSAGES } = require('../constants/messages');
+const Keyrock = require('../helpers/keyrock');
 
 async function auth(req, res, next) {
-  const token = req.header("Token");
-  if (!token) {
-    return res.status(404).send({ error: "Token not found" });
-  }
+  try {
+    const token = req.header(KEYROCK.TOKEN_REQUEST_HEADER);
 
-  Keyrock.validateToken(token)
-    .then(next())
-    .catch(res.status(401).send({ error: "User not allowed" }));
-  //next();
+    if (!token) {
+      throw { code: 404, message: MESSAGES.TOKEN_NOT_FOUND };
+    }
+
+    await Keyrock.validateToken(token)
+      .then((res) => {
+        next();
+      })
+      .catch((e) => {
+        throw { code: 401, message: MESSAGES.USER_NOT_ALLOWED };
+      });
+  } catch (error) {
+    res.status(error.code ?? 500).send({
+      error: error.message ?? MESSAGES.IDENTITY_MANAGER_CONNECTION_ERROR,
+    });
+  }
 }
 
 module.exports = auth;
