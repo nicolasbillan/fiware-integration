@@ -59,6 +59,13 @@ async function storeExpense(travelId, expense) {
 async function removeExpense(travelId, expenseId) {
   let expenses = await getExpensesFromTravel(travelId);
 
+  /* Find expense */
+  let expense = expenses.value.find((e) => e.id == expenseId);
+
+  if (!expense) {
+    throw { code: 404, message: MESSAGES.EXPENSE_NOT_FOUND };
+  }
+
   expenses.value = expenses.value.filter((v) => v.id != expenseId);
 
   return await Orion.updateAttribute(
