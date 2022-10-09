@@ -15,6 +15,7 @@ async function getTravel(id) {
 }
 
 async function getTravels() {
+  //TODO: filter by user
   let travels = await Orion.getEntities({ type: ORION.ENTITY_TYPE_TRAVEL });
   return travels.map((t) => Parser.parseTravel(t));
 }
@@ -24,25 +25,48 @@ async function storeTravel(travel) {
 }
 
 async function updateTravel(id, attributes) {
-  await Orion.updateEntity(id, formatAttributes(attributes));
+  await Orion.updateEntity(id, Parser.formatTravel(attributes));
 }
 
 async function deleteTravel(id) {
   await Orion.deleteEntity(id);
 }
 
+function createTravel(attributes) {
+  attributes.expenses = [];
+
+  return {
+    id: generateId(),
+    type: ORION.ENTITY_TYPE_TRAVEL,
+    ...Parser.formatTravel(attributes),
+  };
+}
+
+//EXPENSES
+
 async function storeExpense(travelId, expense) {
   let expenses = await getExpensesFromTravel(travelId);
 
-  expense = adaptExpense(expense);
+  expenses.value.push(createExpense(expense));
 
-  expense = {
-    id: ORION.ENTITY_TYPE_EXPENSE + expenses.length,
-    type: ORION.ENTITY_TYPE_EXPENSE,
-    ...expense,
-  };
+  return await Orion.updateAttribute(
+    travelId,
+    ORION.ATTRIBUTE_NAME_EXPENSES,
+    expenses
+  );
+}
 
-  expenses.value.push(expense);
+async function removeExpense(travelId, expenseId) {
+  let expenses = await getExpensesFromTravel(travelId);
+
+  /* Find expense */
+  let expense = expenses.value.find((e) => e.id == expenseId);
+
+  if (!expense) {
+    throw { code: 404, message: MESSAGES.EXPENSE_NOT_FOUND };
+  }
+
+  expenses.value = expenses.value.filter((v) => v.id != expenseId);
 
   return await Orion.updateAttribute(
     travelId,
@@ -54,25 +78,18 @@ async function storeExpense(travelId, expense) {
 async function updateExpense(travelId, expenseId, attributes) {
   let expenses = await getExpensesFromTravel(travelId);
 
+  /* Find expense */
   let expense = expenses.value.find((e) => e.id == expenseId);
 
   if (!expense) {
     throw { code: 404, message: MESSAGES.EXPENSE_NOT_FOUND };
   }
 
-  //TODO:
-  //compose new expense with old + new attributes
-  //swap expenses from collection
+  /* Remove old expense */
+  expenses.value = expenses.value.filter((v) => v.id != expenseId);
 
-  return await Orion.updateAttribute(travelId, 'expenses', expenses);
-}
-
-async function removeExpense(travelId, expenseId) {
-  let expenses = await getExpensesFromTravel(travelId);
-
-  expenses = expenses
-    .filter((v) => v.id != expenseId)
-    .map((e) => adaptExpense(e));
+  /* Insert new expense */
+  expenses.value.push(Parser.formatExpense(mergeExpense(expense, attributes)));
 
   return await Orion.updateAttribute(
     travelId,
@@ -84,13 +101,13 @@ async function removeExpense(travelId, expenseId) {
 async function getExpense(travelId, expenseId) {
   let expenses = await getExpensesFromTravel(travelId);
 
-  let result = expenses.value.find((v) => v.id == expenseId);
+  let expense = expenses.value.find((v) => v.id == expenseId);
 
-  if (result) {
-    return parseExpense(result);
+  if (!expense) {
+    throw { code: 404, message: MESSAGES.EXPENSE_NOT_FOUND };
   }
 
-  throw { code: 404, message: 'Expense Not Found' };
+  return Parser.parseExpense(expense);
 }
 
 async function getExpenses(travelId) {
@@ -106,56 +123,38 @@ async function getExpensesFromTravel(id) {
   return expenses;
 }
 
-function createTravel(attributes) {
-  attributes.expenses = [];
-
+function createExpense(attributes) {
   return {
     id: generateId(),
-    type: ORION.ENTITY_TYPE_TRAVEL,
-    ...formatAttributes(attributes),
+    type: ORION.ENTITY_TYPE_EXPENSE,
+    ...Parser.formatExpense(attributes),
   };
 }
 
-/// Parse travel dto into orion's (context broker) accepted format and also purges unwanted attributes
-function formatAttributes(travel) {
-  let converted = {};
-
-  if (travel.title) {
-    converted.title = {
-      type: ORION.ATTRIBUTE_TYPE_STRING,
-      value: travel.title,
-    };
-  }
-
-  if (travel.budget) {
-    converted.budget = {
-      type: ORION.ATTRIBUTE_TYPE_NUMBER,
-      value: travel.budget,
-    };
-  }
-
-  if (travel.startDate) {
-    converted.startDate = {
-      type: ORION.ATTRIBUTE_TYPE_DATE,
-      value: travel.startDate,
-    };
-  }
-
-  if (travel.endDate) {
-    converted.endDate = {
-      type: ORION.ATTRIBUTE_TYPE_DATE,
-      value: travel.endDate,
-    };
-  }
-
-  if (travel.expenses) {
-    converted.expenses = {
-      type: ORION.ATTRIBUTE_TYPE_ARRAY,
-      value: travel.expenses,
-    };
-  }
-
-  return converted;
+function mergeExpense(oldAttributes, newAttributes) {
+  return {
+    id: oldAttributes.id,
+    type: oldAttributes.type,
+    title: !newAttributes.title
+      ? oldAttributes.title.value
+      : newAttributes.title,
+    amount: !newAttributes.amount
+      ? oldAttributes.amount.value
+      : newAttributes.amount,
+    date: !newAttributes.date ? oldAttributes.date.value : newAttributes.date,
+    location: !newAttributes.location
+      ? oldAttributes.location.value
+      : newAttributes.location,
+    currency: !newAttributes.currency
+      ? oldAttributes.currency.value
+      : newAttributes.currency,
+    category: !newAttributes.category
+      ? oldAttributes.category.value
+      : newAttributes.category,
+    paymentMethod: !newAttributes.paymentMethod
+      ? oldAttributes.paymentMethod.value
+      : newAttributes.paymentMethod,
+  };
 }
 
 function adaptExpense(expense) {
@@ -173,7 +172,7 @@ function adaptExpense(expense) {
       value: expense.date,
     },
     location: {
-      type: 'geo:point',
+      type: ORION.ATTRIBUTE_TYPE_GEOLOCATION,
       value: `${expense.location.lat}, ${expense.location.long}`,
     },
     currency: {

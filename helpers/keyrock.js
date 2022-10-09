@@ -25,8 +25,6 @@ function handleException(e) {
   };
 }
 
-let token = '';
-
 async function adminLogin() {
   return axios
     .post(
@@ -34,35 +32,36 @@ async function adminLogin() {
       KEYROCK_ADMIN_USER_DATA
     )
     .then((res) => {
-      token = res.headers[KEYROCK.TOKEN_RESPONSE_HEADER];
-      return token;
+      return res.headers[KEYROCK.TOKEN_RESPONSE_HEADER];
     })
     .catch((e) => handleException(e));
 }
 
 async function getToken(username, password) {
   return axios
-    .post(`${KEYROCK_API_URL}${KEYROCK_TOKENS_CONTROLLER}`, {
+    .post(`${KEYROCK_API_URL}${KEYROCK.TOKENS_CONTROLLER}`, {
       name: username,
       password: password,
     })
     .then((res) => {
       /* TODO: store token in app lifetime */
-      token = res.headers[KEYROCK.TOKEN_RESPONSE_HEADER];
-      console.log('Headers: ', JSON.stringify(token));
-      console.log('Response: ', res.data);
-      return { ...res.data.token, value: token };
+      return {
+        ...res.data.token,
+        value: res.headers[KEYROCK.TOKEN_RESPONSE_HEADER],
+      };
     })
     .catch((e) => handleException(e));
 }
 
 async function validateToken(token) {
   return axios
-    .post(`${KEYROCK_API_URL}${KEYROCK_TOKENS_CONTROLLER}`, { token: token })
+    .post(`${KEYROCK_API_URL}${KEYROCK.TOKENS_CONTROLLER}`, { token: token })
     .then((res) => {
       /* TODO: store token in app lifetime */
-      token = res.headers[KEYROCK.TOKEN_RESPONSE_HEADER];
-      return { ...res.data.token, value: token };
+      return {
+        ...res.data.token,
+        value: res.headers[KEYROCK.TOKEN_RESPONSE_HEADER],
+      };
     })
     .catch((e) => handleException(e));
 }
@@ -86,45 +85,30 @@ function getUsers() {
 async function createUser(user) {
   return await adminLogin()
     .then((res) => {
-      let body = {
-        user: {
-          username: user.email,
-          email: user.email,
-          password: user.password,
-        },
-      };
-
       let config = { headers: {} };
-      config.headers[KEYROCK.TOKEN_REQUEST_HEADER] = token;
+      config.headers[KEYROCK.TOKEN_REQUEST_HEADER] = res;
 
       return axios.post(
         `${KEYROCK_API_URL}${KEYROCK.USERS_CONTROLLER}`,
-        body,
+        formatUser(user),
         config
       );
+    })
+    .then((res) => {
+      console.log(`User created`);
+      console.log(`statusCode: ${res.status}`);
     })
     .catch((e) => handleException(e));
 }
 
-function createUserPost(token) {
-  let config = {
-    headers: {
-      'X-Auth-token': token,
+function formatUser(user) {
+  return {
+    user: {
+      username: user.email,
+      email: user.email,
+      password: user.password,
     },
   };
-
-  axios
-    .post(
-      `${KEYROCK_API_URL}${KEYROCK_USERS_CONTROLLER}`,
-      KEYROCK_MOCK_USER_CREATE,
-      config
-    )
-    .then((res) => {
-      console.log(`User created`);
-      console.log(`statusCode: ${res.status}`);
-      console.log('Response: ', res.data);
-    })
-    .catch((e) => console.log(e));
 }
 
 module.exports = { getToken, validateToken, getUsers, createUser };

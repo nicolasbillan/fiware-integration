@@ -3,22 +3,21 @@ var router = express.Router();
 
 const Travels = require('../data/travel');
 const auth = require('../middleware/auth');
-
-//TODO: AUTH
+const { MESSAGES } = require('../constants/messages');
 
 //TRAVELS
 
 /* GET travels listing. */
-router.get('/', async function (req, res, next) {
-  try {
-    res.json(await Travels.getTravels());
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+router.get('/', auth, async function (req, res, next) {
+  return Travels.getTravels()
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 /* GET single Travel */
-router.get('/:id', async function (req, res, next) {
+router.get('/:id', auth, async function (req, res, next) {
   try {
     let result = await Travels.getTravel(req.params.id);
     res.json(result);
@@ -28,30 +27,30 @@ router.get('/:id', async function (req, res, next) {
 });
 
 /* Create Travel */
-router.post('/', async function (req, res, next) {
+router.post('/', auth, async function (req, res, next) {
   try {
     await Travels.storeTravel(req.body);
-    res.send('Travel created');
+    res.send(MESSAGES.TRAVEL_CREATED);
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
   }
 });
 
 /* Update Travel */
-router.put('/:id', async function (req, res, next) {
+router.put('/:id', auth, async function (req, res, next) {
   try {
     await Travels.updateTravel(req.params.id, req.body);
-    res.send('Travel updated');
+    res.send(MESSAGES.TRAVEL_UPDATED);
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
   }
 });
 
 /* Delete Travel */
-router.delete('/:id', async function (req, res, next) {
+router.delete('/:id', auth, async function (req, res, next) {
   try {
     await Travels.deleteTravel(req.params.id);
-    res.send('Travel deleted');
+    res.send(MESSAGES.TRAVEL_DELETED);
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
   }
@@ -60,7 +59,7 @@ router.delete('/:id', async function (req, res, next) {
 //EXPENSES
 
 /* Get all expenses in Travel */
-router.get('/:id/expenses/', async function (req, res, next) {
+router.get('/:id/expenses/', auth, async function (req, res, next) {
   try {
     let result = await Travels.getExpenses(req.params.id);
     res.json(result);
@@ -70,7 +69,7 @@ router.get('/:id/expenses/', async function (req, res, next) {
 });
 
 /* Get expense in Travel */
-router.get('/:id/expenses/:expId', async function (req, res, next) {
+router.get('/:id/expenses/:expId', auth, async function (req, res, next) {
   try {
     let result = await Travels.getExpense(req.params.id, req.params.expId);
     res.json(result);
@@ -80,34 +79,30 @@ router.get('/:id/expenses/:expId', async function (req, res, next) {
 });
 
 /* Create expense in Travel */
-router.post('/:id/expenses', async function (req, res, next) {
+router.post('/:id/expenses', auth, async function (req, res, next) {
   try {
     await Travels.storeExpense(req.params.id, req.body);
-    res.send('Expense created');
+    res.send(MESSAGES.EXPENSE_CREATED);
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
   }
 });
 
 /* Update expense in Travel */
-router.put('/:id/expenses/:expId', async function (req, res, next) {
+router.put('/:id/expenses/:expId', auth, async function (req, res, next) {
   try {
-    let result = await Travels.updateExpense(
-      req.params.id,
-      req.params.expId,
-      req.body
-    );
-    res.json(result);
+    await Travels.updateExpense(req.params.id, req.params.expId, req.body);
+    res.send(MESSAGES.EXPENSE_UPDATED);
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
   }
 });
 
 /* Delete expense in Travel */
-router.delete('/:id/expenses/:expId', async function (req, res, next) {
+router.delete('/:id/expenses/:expId', auth, async function (req, res, next) {
   try {
-    let result = await Travels.removeExpense(req.params.id, req.params.expId);
-    res.send(result);
+    await Travels.removeExpense(req.params.id, req.params.expId);
+    res.send(MESSAGES.EXPENSE_DELETED);
   } catch (error) {
     res.status(error.code ?? 500).send(error.message);
   }

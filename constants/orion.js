@@ -8,6 +8,7 @@ const ORION = {
   ATTRIBUTE_TYPE_NUMBER: 'Float',
   ATTRIBUTE_TYPE_DATE: 'Datetime',
   ATTRIBUTE_TYPE_ARRAY: 'StructuredValue',
+  ATTRIBUTE_TYPE_GEOLOCATION: 'geo:point',
   ATTRIBUTE_NAME_EXPENSES: 'expenses',
 };
 
