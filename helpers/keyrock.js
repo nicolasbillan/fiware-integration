@@ -9,14 +9,6 @@ const KEYROCK_ADMIN_USER_DATA = {
   password: process.env.KEYROCK_ADMIN_PASSWORD,
 };
 
-const KEYROCK_MOCK_USER_CREATE = {
-  user: {
-    username: 'nico',
-    email: 'nico@test.com',
-    password: 'passw0rd',
-  },
-};
-
 function handleException(e) {
   throw {
     code: e.response?.status ?? 500,

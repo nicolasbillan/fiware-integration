@@ -1,5 +1,11 @@
 const { ORION } = require('../constants/orion');
+const crypto = require('crypto');
 
+function generateId() {
+  return crypto.randomUUID();
+}
+
+//Turns Orion API format into ours
 function parseTravel(travel) {
   return {
     id: travel.id,
@@ -11,8 +17,17 @@ function parseTravel(travel) {
   };
 }
 
+//Turns our API format into Orion (only existing properties)
 function formatTravel(travel) {
   let formatted = {};
+
+  if (travel.id) {
+    formatted.id = travel.id;
+  }
+
+  if (travel.type) {
+    formatted.type = travel.type;
+  }
 
   if (travel.title) {
     formatted.title = {
@@ -21,7 +36,7 @@ function formatTravel(travel) {
     };
   }
 
-  if (travel.budget) {
+  if (travel.budget || travel.budget === 0) {
     formatted.budget = {
       type: ORION.ATTRIBUTE_TYPE_NUMBER,
       value: travel.budget,
@@ -52,6 +67,20 @@ function formatTravel(travel) {
   return formatted;
 }
 
+//Creates empty ORION style travel with all properties
+function createTravel() {
+  return {
+    id: generateId(),
+    type: ORION.ENTITY_TYPE_TRAVEL,
+    title: ORION.DEFAULT_STRING,
+    budget: 0,
+    startDate: ORION.DEFAULT_DATE,
+    endDate: ORION.DEFAULT_DATE,
+    expenses: [],
+  };
+}
+
+//Turns Orion API format into ours
 function parseExpense(expense) {
   return {
     id: expense.id,
@@ -65,6 +94,7 @@ function parseExpense(expense) {
   };
 }
 
+//Turns our API format into Orion (only existing properties)p
 function formatExpense(expense) {
   let formatted = {};
 
@@ -83,7 +113,7 @@ function formatExpense(expense) {
     };
   }
 
-  if (expense.amount) {
+  if (expense.amount || expense.amount === 0) {
     formatted.amount = {
       type: ORION.ATTRIBUTE_TYPE_NUMBER,
       value: expense.amount,
@@ -128,6 +158,24 @@ function formatExpense(expense) {
   return formatted;
 }
 
+//Creates empty expense with all properties
+function createExpense() {
+  return {
+    id: generateId(),
+    type: ORION.ENTITY_TYPE_EXPENSE,
+    title: ORION.DEFAULT_STRING,
+    amount: 0,
+    date: ORION.DEFAULT_DATE,
+    location: {
+      lat: 0,
+      long: 0,
+    },
+    currency: ORION.DEFAULT_STRING,
+    category: ORION.DEFAULT_STRING,
+    paymentMethod: ORION.DEFAULT_STRING,
+  };
+}
+
 function formatUser(user) {
   let formatted = {};
 
@@ -160,7 +208,9 @@ function parseLocation(location) {
 module.exports = {
   parseTravel,
   formatTravel,
+  createTravel,
   parseExpense,
   formatExpense,
+  createExpense,
   formatUser,
 };

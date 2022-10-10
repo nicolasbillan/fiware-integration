@@ -1,6 +1,5 @@
-version: "3.5"
+version: '3.5'
 services:
-
   # Orion is the context broker
   orion:
     image: fiware/orion
@@ -9,7 +8,7 @@ services:
     depends_on:
       - mongo-db
     ports:
-      - "1026:1026"
+      - '1026:1026'
     command: -dbhost mongo-db -logLevel DEBUG -noCache
 
   # Cygnus is configured to write context data to PostgeSQL
@@ -22,18 +21,18 @@ services:
     depends_on:
       - postgres-db
     ports:
-      - "5055:5055"
-      - "5080:5080" 
+      - '5055:5055'
+      - '5080:5080'
     environment:
-      - "CYGNUS_POSTGRESQL_HOST=postgres-db" # Hostname of the PostgreSQL server used to persist historical context data
-      - "CYGNUS_POSTGRESQL_PORT=5432" # Port that the PostgreSQL server uses to listen to commands
-      - "CYGNUS_POSTGRESQL_USER=postgres" # Username for the PostgreSQL database user
-      - "CYGNUS_POSTGRESQL_PASS=password" # Password for the PostgreSQL database user
-      - "CYGNUS_POSTGRESQL_ENABLE_CACHE=true" # Switch to enable caching within the PostgreSQL configuration
-      - "CYGNUS_POSTGRESQL_SERVICE_PORT=5055" # The port the agent.conf is configured for
-      - "CYGNUS_LOG_LEVEL=DEBUG" # The logging level for Cygnus
-      - "CYGNUS_SERVICE_PORT=5055" # Notification Port that Cygnus listens to for Postgres subscriptions
-      - "CYGNUS_API_PORT=5080" # Port that Cygnus listens on for operational reasons
+      - 'CYGNUS_POSTGRESQL_HOST=postgres-db' # Hostname of the PostgreSQL server used to persist historical context data
+      - 'CYGNUS_POSTGRESQL_PORT=5432' # Port that the PostgreSQL server uses to listen to commands
+      - 'CYGNUS_POSTGRESQL_USER=postgres' # Username for the PostgreSQL database user
+      - 'CYGNUS_POSTGRESQL_PASS=password' # Password for the PostgreSQL database user
+      - 'CYGNUS_POSTGRESQL_ENABLE_CACHE=true' # Switch to enable caching within the PostgreSQL configuration
+      - 'CYGNUS_POSTGRESQL_SERVICE_PORT=5055' # The port the agent.conf is configured for
+      - 'CYGNUS_LOG_LEVEL=DEBUG' # The logging level for Cygnus
+      - 'CYGNUS_SERVICE_PORT=5055' # Notification Port that Cygnus listens to for Postgres subscriptions
+      - 'CYGNUS_API_PORT=5080' # Port that Cygnus listens on for operational reasons
 
   # Keyrock is our Identity Manager
   keyrock:
@@ -41,25 +40,25 @@ services:
     container_name: fiware-keyrock
     hostname: keyrock
     networks:
-        default:
-            ipv4_address: 172.18.1.5
+      default:
+        ipv4_address: 172.18.1.5
     depends_on:
-        - mysql-db
+      - mysql-db
     ports:
-        - '3000:3000'
-        - '443:443'
+      - '3000:3000'
+      - '443:443'
     environment:
-        - DEBUG=idm:*
-        - IDM_DB_HOST=mysql-db
-        - IDM_HOST=http://localhost:3000
-        - IDM_PORT=3000
-        # Development use only
-        # Use Docker Secrets for Sensitive Data
-        - IDM_DB_PASS=secret
-        - IDM_DB_USER=root
-        - IDM_ADMIN_USER=admin
-        - IDM_ADMIN_EMAIL=admin@test.com
-        - IDM_ADMIN_PASS=${KEYROCK_ADMIN_PASSWORD:-1234}
+      - DEBUG=idm:*
+      - IDM_DB_HOST=mysql-db
+      - IDM_HOST=http://localhost:3000
+      - IDM_PORT=3000
+      # Development use only
+      # Use Docker Secrets for Sensitive Data
+      - IDM_DB_PASS=secret
+      - IDM_DB_USER=root
+      - IDM_ADMIN_USER=admin
+      - IDM_ADMIN_EMAIL=${KEYROCK_ADMIN_USER:-admin@test.com}
+      - IDM_ADMIN_PASS=${KEYROCK_ADMIN_PASSWORD:-1234}
 
   # Databases - Orion uses Mongo-DB, Cygnus is persisting to Postgres, Keyrock relies on MySQL
   mongo-db:
@@ -67,49 +66,49 @@ services:
     hostname: mongo-db
     container_name: db-mongo
     ports:
-      - "27017:27017" 
+      - '27017:27017'
     command: --bind_ip_all --smallfiles
     volumes:
       - mongo-db:/data
-      
+
   postgres-db:
     image: postgres
     hostname: postgres-db
     container_name: db-postgres
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
-      - "POSTGRES_PASSWORD=password"
-      - "POSTGRES_USER=postgres"
-      - "POSTGRES_DB=postgres"
+      - 'POSTGRES_PASSWORD=password'
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_DB=postgres'
     volumes:
       - postgres-db:/var/lib/postgresql/data
- 
+
   mysql-db:
     restart: always
     image: mysql:5.7
     hostname: mysql-db
     container_name: db-mysql
     expose:
-        - '3306'
+      - '3306'
     ports:
-        - '3306:3306'
+      - '3306:3306'
     networks:
-        default:
-            ipv4_address: 172.18.1.6
+      default:
+        ipv4_address: 172.18.1.6
     environment:
-        # Development use only
-        # Use Docker Secrets for Sensitive Data
-        - 'MYSQL_ROOT_PASSWORD=secret'
-        - 'MYSQL_ROOT_HOST=172.18.1.5'
+      # Development use only
+      # Use Docker Secrets for Sensitive Data
+      - 'MYSQL_ROOT_PASSWORD=secret'
+      - 'MYSQL_ROOT_HOST=172.18.1.5'
     volumes:
-        - mysql-db:/var/lib/mysql
+      - mysql-db:/var/lib/mysql
 
 networks:
-    default:
-        ipam:
-            config:
-                - subnet: 172.18.1.0/24
+  default:
+    ipam:
+      config:
+        - subnet: 172.18.1.0/24
 
 volumes:
   mongo-db: ~
