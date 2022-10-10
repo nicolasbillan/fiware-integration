@@ -21,7 +21,12 @@ async function getTravels() {
 }
 
 async function storeTravel(travel) {
-  await Orion.createEntity(createTravel(travel));
+  travel = {
+    ...Parser.createTravel(),
+    ...travel,
+  };
+
+  await Orion.createEntity(Parser.formatTravel(travel));
 }
 
 async function updateTravel(id, attributes) {
@@ -32,22 +37,17 @@ async function deleteTravel(id) {
   await Orion.deleteEntity(id);
 }
 
-function createTravel(attributes) {
-  attributes.expenses = [];
-
-  return {
-    id: generateId(),
-    type: ORION.ENTITY_TYPE_TRAVEL,
-    ...Parser.formatTravel(attributes),
-  };
-}
-
 //EXPENSES
 
 async function storeExpense(travelId, expense) {
   let expenses = await getExpensesFromTravel(travelId);
 
-  expenses.value.push(createExpense(expense));
+  expense = {
+    ...Parser.createExpense(),
+    ...expense,
+  };
+
+  expenses.value.push(Parser.formatExpense(expense));
 
   return await Orion.updateAttribute(
     travelId,
@@ -112,9 +112,9 @@ async function getExpense(travelId, expenseId) {
 
 async function getExpenses(travelId) {
   //TODO: filter
-  return (await getExpensesFromTravel(travelId)).value.map((e) =>
-    Parser.parseExpense(e)
-  );
+  let expenses = (await getExpensesFromTravel(travelId)).value;
+
+  return expenses.map((e) => Parser.parseExpense(e));
 }
 
 async function getExpensesFromTravel(id) {
@@ -155,39 +155,6 @@ function mergeExpense(oldAttributes, newAttributes) {
       ? oldAttributes.paymentMethod.value
       : newAttributes.paymentMethod,
   };
-}
-
-function adaptExpense(expense) {
-  return (expense = {
-    title: {
-      type: ORION.ATTRIBUTE_TYPE_STRING,
-      value: expense.title,
-    },
-    amount: {
-      type: ORION.ATTRIBUTE_TYPE_NUMBER,
-      value: expense.amount,
-    },
-    date: {
-      type: ORION.ATTRIBUTE_TYPE_DATE,
-      value: expense.date,
-    },
-    location: {
-      type: ORION.ATTRIBUTE_TYPE_GEOLOCATION,
-      value: `${expense.location.lat}, ${expense.location.long}`,
-    },
-    currency: {
-      type: ORION.ATTRIBUTE_TYPE_STRING,
-      value: expense.currency,
-    },
-    category: {
-      type: ORION.ATTRIBUTE_TYPE_STRING,
-      value: expense.category,
-    },
-    paymentMethod: {
-      type: ORION.ATTRIBUTE_TYPE_STRING,
-      value: expense.paymentMethod,
-    },
-  });
 }
 
 module.exports = {

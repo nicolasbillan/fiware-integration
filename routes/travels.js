@@ -60,12 +60,11 @@ router.delete('/:id', auth, async function (req, res, next) {
 
 /* Get all expenses in Travel */
 router.get('/:id/expenses/', auth, async function (req, res, next) {
-  try {
-    let result = await Travels.getExpenses(req.params.id);
-    res.json(result);
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+  await Travels.getExpenses(req.params.id)
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 /* Get expense in Travel */
