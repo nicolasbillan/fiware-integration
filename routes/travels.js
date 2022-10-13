@@ -6,10 +6,21 @@ const auth = require('../middleware/auth');
 const { MESSAGES } = require('../constants/messages');
 
 //TRAVELS
+async function getTravelForUser(id, user) {
+  return Travels.getTravel(id).then((result) => {
+    if (result.user != user)
+      throw {
+        code: 404,
+        message: MESSAGES.TRAVEL_NOT_FOUND,
+      };
+    return result;
+  });
+}
 
 /* GET travels listing. */
 router.get('/', auth, async function (req, res, next) {
-  return Travels.getTravels()
+  //TODO: filters (title, dates, etc...)
+  return Travels.getTravels({ user: req.params.userId })
     .then((result) => {
       res.json(result);
     })
@@ -18,49 +29,45 @@ router.get('/', auth, async function (req, res, next) {
 
 /* GET single Travel */
 router.get('/:id', auth, async function (req, res, next) {
-  try {
-    let result = await Travels.getTravel(req.params.id);
-    res.json(result);
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+  return getTravelForUser(req.params.id, req.params.userId)
+    .then((result) => res.json(result))
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 /* Create Travel */
 router.post('/', auth, async function (req, res, next) {
-  try {
-    await Travels.storeTravel(req.body);
-    res.send(MESSAGES.TRAVEL_CREATED);
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+  let travel = {
+    ...req.body,
+    user: req.params.userId,
+  };
+
+  await Travels.storeTravel(travel)
+    .then(() => res.send(MESSAGES.TRAVEL_CREATED))
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 /* Update Travel */
 router.put('/:id', auth, async function (req, res, next) {
-  try {
-    await Travels.updateTravel(req.params.id, req.body);
-    res.send(MESSAGES.TRAVEL_UPDATED);
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+  return getTravelForUser(req.params.id, req.params.userId)
+    .then(() => Travels.updateTravel(req.params.id, req.body))
+    .then(() => res.send(MESSAGES.TRAVEL_UPDATED))
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 /* Delete Travel */
 router.delete('/:id', auth, async function (req, res, next) {
-  try {
-    await Travels.deleteTravel(req.params.id);
-    res.send(MESSAGES.TRAVEL_DELETED);
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+  return getTravelForUser(req.params.id, req.params.userId)
+    .then(() => Travels.deleteTravel(req.params.id))
+    .then(() => res.send(MESSAGES.TRAVEL_DELETED))
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 //EXPENSES
 
 /* Get all expenses in Travel */
 router.get('/:id/expenses/', auth, async function (req, res, next) {
-  await Travels.getExpenses(req.params.id)
+  return getTravelForUser(req.params.id, req.params.userId)
+    .then(() => Travels.getExpenses(req.params.id))
     .then((result) => {
       res.json(result);
     })
@@ -69,42 +76,38 @@ router.get('/:id/expenses/', auth, async function (req, res, next) {
 
 /* Get expense in Travel */
 router.get('/:id/expenses/:expId', auth, async function (req, res, next) {
-  try {
-    let result = await Travels.getExpense(req.params.id, req.params.expId);
-    res.json(result);
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+  return getTravelForUser(req.params.id, req.params.userId)
+    .then(() => Travels.getExpense(req.params.id, req.params.expId))
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 /* Create expense in Travel */
 router.post('/:id/expenses', auth, async function (req, res, next) {
-  try {
-    await Travels.storeExpense(req.params.id, req.body);
-    res.send(MESSAGES.EXPENSE_CREATED);
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+  return getTravelForUser(req.params.id, req.params.userId)
+    .then(() => Travels.storeExpense(req.params.id, req.body))
+    .then(() => res.send(MESSAGES.EXPENSE_CREATED))
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 /* Update expense in Travel */
 router.put('/:id/expenses/:expId', auth, async function (req, res, next) {
-  try {
-    await Travels.updateExpense(req.params.id, req.params.expId, req.body);
-    res.send(MESSAGES.EXPENSE_UPDATED);
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+  return getTravelForUser(req.params.id, req.params.userId)
+    .then(() =>
+      Travels.updateExpense(req.params.id, req.params.expId, req.body)
+    )
+    .then(() => res.send(MESSAGES.EXPENSE_UPDATED))
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 /* Delete expense in Travel */
 router.delete('/:id/expenses/:expId', auth, async function (req, res, next) {
-  try {
-    await Travels.removeExpense(req.params.id, req.params.expId);
-    res.send(MESSAGES.EXPENSE_DELETED);
-  } catch (error) {
-    res.status(error.code ?? 500).send(error.message);
-  }
+  return getTravelForUser(req.params.id, req.params.userId)
+    .then(() => Travels.removeExpense(req.params.id, req.params.expId))
+    .then(() => res.send(MESSAGES.EXPENSE_DELETED))
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 module.exports = router;

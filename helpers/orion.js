@@ -38,8 +38,13 @@ async function getEntities(parameters) {
 
   let url = `${ORION_LOCAL_API_URL}${ORION.ENTITIES_CONTROLLER}?type=${parameters.type}`;
 
+  //todo: multiple filter
   if (parameters.email) {
     url += `&q=email==${parameters.email}`;
+  }
+
+  if (parameters.user) {
+    url += `&q=user==${parameters.user}`;
   }
 
   return axios

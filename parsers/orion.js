@@ -9,6 +9,7 @@ function generateId() {
 function parseTravel(travel) {
   return {
     id: travel.id,
+    user: travel.user.value,
     title: travel.title.value,
     budget: travel.budget.value,
     startDate: travel.startDate.value,
@@ -23,6 +24,13 @@ function formatTravel(travel) {
 
   if (travel.id) {
     formatted.id = travel.id;
+  }
+
+  if (travel.user) {
+    formatted.user = {
+      type: ORION.ATTRIBUTE_TYPE_STRING,
+      value: travel.user,
+    };
   }
 
   if (travel.type) {
@@ -72,6 +80,7 @@ function createTravel() {
   return {
     id: generateId(),
     type: ORION.ENTITY_TYPE_TRAVEL,
+    user: ORION.DEFAULT_STRING,
     title: ORION.DEFAULT_STRING,
     budget: 0,
     startDate: ORION.DEFAULT_DATE,
@@ -197,6 +206,14 @@ function formatUser(user) {
   return formatted;
 }
 
+function createUser() {
+  return {
+    id: generateId(),
+    type: ORION.ENTITY_TYPE_USER,
+    email: ORION.DEFAULT_STRING,
+  };
+}
+
 function parseLocation(location) {
   let parts = location.split(',');
   return {
@@ -213,4 +230,5 @@ module.exports = {
   formatExpense,
   createExpense,
   formatUser,
+  createUser,
 };
