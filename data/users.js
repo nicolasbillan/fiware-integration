@@ -30,8 +30,6 @@ async function storeUser(user) {
   await Keyrock.createUser(user).then(
     Orion.createEntity(Parser.formatUser(orionUser))
   );
-
-  await Orion.createEntity(Parser.formatTravel(travel));
 }
 
 async function updateUser(id, attributes) {
