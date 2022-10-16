@@ -14,9 +14,12 @@ async function getTravel(id) {
   return Parser.parseTravel(await Orion.getEntity(id));
 }
 
-async function getTravels() {
-  //TODO: filter by user
-  let travels = await Orion.getEntities({ type: ORION.ENTITY_TYPE_TRAVEL });
+async function getTravels(filters) {
+  //TODO: general filters (title, date, etc...)
+  let travels = await Orion.getEntities({
+    type: ORION.ENTITY_TYPE_TRAVEL,
+    user: filters.user,
+  });
   return travels.map((t) => Parser.parseTravel(t));
 }
 
