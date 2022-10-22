@@ -10,7 +10,7 @@ async function createToken(token, email) {
   let user = await Users.getUserByEmail(email);
   let tokenObject = { id: user.id, token: token.value };
   console.log(tokenObject);
-  return jwt.sign(tokenObject, process.env.SECRET_KEY, { expiresIn: '1h' });
+  return jwt.sign(tokenObject, process.env.SECRET_KEY, { expiresIn: '24h' });
 }
 
 router.get('/:email', async function (req, res) {
