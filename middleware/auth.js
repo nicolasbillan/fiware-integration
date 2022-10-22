@@ -2,6 +2,7 @@ const { KEYROCK } = require('../constants/keyrock');
 const { MESSAGES } = require('../constants/messages');
 const Keyrock = require('../helpers/keyrock');
 const jwt = require('jsonwebtoken');
+const config = require('../config');
 
 async function auth(req, res, next) {
   try {
@@ -13,7 +14,7 @@ async function auth(req, res, next) {
 
     try {
       //  decript token
-      let tokenObject = jwt.verify(token, process.env.SECRET_KEY);
+      let tokenObject = jwt.verify(token, config.SECRET_KEY);
 
       //  validate token
       await Keyrock.validateToken(tokenObject.token).then((res) => {

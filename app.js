@@ -3,12 +3,12 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-require('dotenv').config();
 
 var indexRouter = require('./routes/index');
 var travelRouter = require('./routes/travels');
 var usersRouter = require('./routes/users');
 var keyrockRouter = require('./routes/keyrock');
+var visionRouter = require("./routes/vision");
 
 var app = express();
 
@@ -26,6 +26,7 @@ app.use('/', indexRouter);
 app.use('/orion/travels', travelRouter);
 app.use('/users', usersRouter);
 app.use('/keyrock', keyrockRouter);
+app.use("/api/vision", visionRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
