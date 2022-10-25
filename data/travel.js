@@ -4,10 +4,6 @@ const Parser = require('../parsers/orion');
 const { MESSAGES } = require('../constants/messages');
 const { ORION } = require('../constants/orion');
 
-function generateId() {
-  return crypto.randomUUID();
-}
-
 //TRAVELS
 
 async function getTravel(id) {
@@ -124,14 +120,6 @@ async function getExpensesFromTravel(id) {
   //TODO: filter expenses in-memory
   let expenses = await Orion.getAttribute(id, ORION.ATTRIBUTE_NAME_EXPENSES);
   return expenses;
-}
-
-function createExpense(attributes) {
-  return {
-    id: generateId(),
-    type: ORION.ENTITY_TYPE_EXPENSE,
-    ...Parser.formatExpense(attributes),
-  };
 }
 
 function mergeExpense(oldAttributes, newAttributes) {

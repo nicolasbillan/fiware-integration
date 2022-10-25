@@ -7,6 +7,5 @@ module.exports = {
     EMAIL_FROM: process.env.EMAIL_FROM,
     SECRET_KEY: process.env.SECRET_KEY,
     KEYROCK_ADMIN_USER: process.env.KEYROCK_ADMIN_USER,
-    KEYROCK_ADMIN_PASSWORD: process.env.KEYROCK_ADMIN_PASSWORD,
-    
+    KEYROCK_ADMIN_PASSWORD: process.env.KEYROCK_ADMIN_PASSWORD,   
 }
