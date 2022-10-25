@@ -6,8 +6,15 @@ const { ORION } = require('../constants/orion');
 
 //TRAVELS
 
-async function getTravel(id) {
-  return Parser.parseTravel(await Orion.getEntity(id));
+async function getTravel(id, user) {
+  let travel = await Orion.getEntity(id);
+  if (user && travel.user.value != user) {
+    throw {
+      code: 404,
+      message: MESSAGES.TRAVEL_NOT_FOUND,
+    };
+  }
+  return Parser.parseTravel(travel);
 }
 
 async function getTravels(filters) {

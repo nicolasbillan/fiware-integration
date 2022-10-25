@@ -7,7 +7,9 @@ function generateId() {
 
 //TODO: TESTING ONLY
 function randomDate(start, end) {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  return new Date(
+    start.getTime() + Math.random() * (end.getTime() - start.getTime())
+  );
 }
 //TODO: TESTING ONLY
 
@@ -98,8 +100,8 @@ function createTravel() {
     startDate: ORION.DEFAULT_DATE,
     endDate: ORION.DEFAULT_DATE,
     expenses: [],
-    creationDate: randomDate(new Date(2012, 0, 1), new Date()).toISOString().split('T')[0]
-    //creationDate: new Date().toISOString().split('T')[0],
+    //creationDate: randomDate(new Date(2012, 0, 1), new Date()).toISOString().split('T')[0]
+    creationDate: new Date().toISOString().split('T')[0],
   };
 }
 
