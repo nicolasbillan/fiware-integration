@@ -5,11 +5,18 @@ function generateId() {
   return crypto.randomUUID();
 }
 
+//TODO: TESTING ONLY
+function randomDate(start, end) {
+  return new Date(
+    start.getTime() + Math.random() * (end.getTime() - start.getTime())
+  );
+}
+//TODO: TESTING ONLY
+
 //Turns Orion API format into ours
 function parseTravel(travel) {
   return {
     id: travel.id,
-    user: travel.user.value,
     title: travel.title.value,
     budget: travel.budget.value,
     startDate: travel.startDate.value,
@@ -72,6 +79,13 @@ function formatTravel(travel) {
     };
   }
 
+  if (travel.creationDate) {
+    formatted.creationDate = {
+      type: ORION.ATTRIBUTE_TYPE_DATE,
+      value: travel.creationDate,
+    };
+  }
+
   return formatted;
 }
 
@@ -86,6 +100,8 @@ function createTravel() {
     startDate: ORION.DEFAULT_DATE,
     endDate: ORION.DEFAULT_DATE,
     expenses: [],
+    //creationDate: randomDate(new Date(2012, 0, 1), new Date()).toISOString().split('T')[0]
+    creationDate: new Date().toISOString().split('T')[0],
   };
 }
 
@@ -203,6 +219,13 @@ function formatUser(user) {
     };
   }
 
+  if (user.creationDate) {
+    formatted.creationDate = {
+      type: ORION.ATTRIBUTE_TYPE_DATE,
+      value: user.creationDate,
+    };
+  }
+
   return formatted;
 }
 
@@ -211,6 +234,7 @@ function createUser() {
     id: generateId(),
     type: ORION.ENTITY_TYPE_USER,
     email: ORION.DEFAULT_STRING,
+    creationDate: new Date().toISOString().split('T')[0],
   };
 }
 

@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
+var adminRouter = require('./routes/admin');
 var travelRouter = require('./routes/travels');
 var usersRouter = require('./routes/users');
 var keyrockRouter = require('./routes/keyrock');
@@ -23,6 +24,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('/admin', adminRouter);
 app.use('/orion/travels', travelRouter);
 app.use('/users', usersRouter);
 app.use('/keyrock', keyrockRouter);

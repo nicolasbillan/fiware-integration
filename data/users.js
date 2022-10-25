@@ -22,14 +22,8 @@ async function storeUser(user) {
     throw { code: 400, message: MESSAGES.EMAIL_ALREADY_IN_USE };
   }
 
-  let orionUser = {
-    ...Parser.createUser(),
-    ...user,
-  };
-
-  await Keyrock.createUser(user).then(
-    Orion.createEntity(Parser.formatUser(orionUser))
-  );
+  await Keyrock.createUser(user);
+  Orion.createEntity(Parser.formatUser({ ...Parser.createUser(), ...user }));
 }
 
 async function updateUser(id, attributes) {

@@ -1,13 +1,9 @@
 const axios = require('axios').default;
+const { KEYROCK_ADMIN_USER, KEYROCK_ADMIN_PASSWORD } = require('../config');
 const { MESSAGES } = require('../constants/messages');
 const { KEYROCK } = require('../constants/keyrock');
 
 const KEYROCK_API_URL = 'http://localhost:3000/v1/';
-
-const KEYROCK_ADMIN_USER_DATA = {
-  name: process.env.KEYROCK_ADMIN_USER,
-  password: process.env.KEYROCK_ADMIN_PASSWORD,
-};
 
 function handleException(e) {
   throw {
@@ -19,10 +15,10 @@ function handleException(e) {
 
 async function adminLogin() {
   return axios
-    .post(
-      `${KEYROCK_API_URL}${KEYROCK.TOKENS_CONTROLLER}`,
-      KEYROCK_ADMIN_USER_DATA
-    )
+    .post(`${KEYROCK_API_URL}${KEYROCK.TOKENS_CONTROLLER}`, {
+      name: KEYROCK_ADMIN_USER,
+      password: KEYROCK_ADMIN_PASSWORD,
+    })
     .then((res) => {
       return res.headers[KEYROCK.TOKEN_RESPONSE_HEADER];
     })
@@ -42,7 +38,9 @@ async function getToken(username, password) {
         value: res.headers[KEYROCK.TOKEN_RESPONSE_HEADER],
       };
     })
-    .catch((e) => handleException(e));
+    .catch((e) => {
+      return handleException(e);
+    });
 }
 
 async function validateToken(token) {
@@ -76,20 +74,13 @@ function getUsers() {
 
 async function createUser(user) {
   return await adminLogin()
-    .then((res) => {
-      let config = { headers: {} };
-      config.headers[KEYROCK.TOKEN_REQUEST_HEADER] = res;
-
-      return axios.post(
+    .then((res) =>
+      axios.post(
         `${KEYROCK_API_URL}${KEYROCK.USERS_CONTROLLER}`,
         formatUser(user),
-        config
-      );
-    })
-    .then((res) => {
-      console.log(`User created`);
-      console.log(`statusCode: ${res.status}`);
-    })
+        { headers: { [`${KEYROCK.TOKEN_REQUEST_HEADER}`]: res } }
+      )
+    )
     .catch((e) => handleException(e));
 }
 

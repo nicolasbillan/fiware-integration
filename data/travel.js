@@ -4,14 +4,17 @@ const Parser = require('../parsers/orion');
 const { MESSAGES } = require('../constants/messages');
 const { ORION } = require('../constants/orion');
 
-function generateId() {
-  return crypto.randomUUID();
-}
-
 //TRAVELS
 
-async function getTravel(id) {
-  return Parser.parseTravel(await Orion.getEntity(id));
+async function getTravel(id, user) {
+  let travel = await Orion.getEntity(id);
+  if (user && travel.user.value != user) {
+    throw {
+      code: 404,
+      message: MESSAGES.TRAVEL_NOT_FOUND,
+    };
+  }
+  return Parser.parseTravel(travel);
 }
 
 async function getTravels(filters) {
@@ -124,14 +127,6 @@ async function getExpensesFromTravel(id) {
   //TODO: filter expenses in-memory
   let expenses = await Orion.getAttribute(id, ORION.ATTRIBUTE_NAME_EXPENSES);
   return expenses;
-}
-
-function createExpense(attributes) {
-  return {
-    id: generateId(),
-    type: ORION.ENTITY_TYPE_EXPENSE,
-    ...Parser.formatExpense(attributes),
-  };
 }
 
 function mergeExpense(oldAttributes, newAttributes) {

@@ -10,7 +10,7 @@ async function createToken(token, email) {
   let user = await Users.getUserByEmail(email);
   let tokenObject = { id: user.id, token: token.value };
   console.log(tokenObject);
-  return jwt.sign(tokenObject, process.env.SECRET_KEY, { expiresIn: '1h' });
+  return jwt.sign(tokenObject, process.env.SECRET_KEY, { expiresIn: '24h' });
 }
 
 router.get('/:email', async function (req, res) {
@@ -21,9 +21,10 @@ router.get('/:email', async function (req, res) {
 
 router.post('/login', async function (req, res) {
   return Keyrock.getToken(req.body.email, req.body.password)
-    .then((result) => createToken(result, req.body.email))
-    .then((result) => res.json(result))
-    .catch((error) => res.status(error.code).send(error.message));
+    .then((result) =>
+      createToken(result, req.body.email).then((result) => res.json(result))
+    )
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
 router.post('/register', async function (req, res) {
