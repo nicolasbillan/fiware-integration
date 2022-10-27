@@ -29,8 +29,8 @@ router.post('/login', async function (req, res) {
 
 router.post('/register', async function (req, res) {
   await Users.storeUser({ email: req.body.email, password: req.body.password })
-    .then((result) => {
-      res.send('user created');
+    .then(() => {
+      res.send();
     })
     .catch((error) => res.status(error.code ?? 500).send(error.message));
 });

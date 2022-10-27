@@ -1,156 +1,140 @@
 const groupBy = require('core-js');
 const Orion = require('../helpers/orion');
-const Parser = require('../parsers/orion');
 const { MESSAGES } = require('../constants/messages');
 const { ORION } = require('../constants/orion');
 
-async function getTravelsByDay() {
-  let travels = await Orion.getEntities({
-    type: ORION.ENTITY_TYPE_TRAVEL,
-  });
-
-  let travelsByDay = travels
-    .filter((t) => t.creationDate)
-    .groupBy((t) => {
-      const dateParts = t.creationDate.value.split('-');
-      return `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`;
-    });
-
-  return Object.keys(travelsByDay)
-    .sort()
-    .map((key) => {
-      return { day: key, travelCount: travelsByDay[key].length };
-    });
+//HELPERS
+function getYearFromCreationDate(entity) {
+  const dateParts = entity.creationDate.value.split('-');
+  return dateParts[0];
 }
 
-async function getTravelsByMonth() {
-  let travels = await Orion.getEntities({
-    type: ORION.ENTITY_TYPE_TRAVEL,
-  });
-
-  let travelsByMonth = travels
-    .filter((t) => t.creationDate)
-    .groupBy((t) => {
-      const dateParts = t.creationDate.value.split('-');
-      return `${dateParts[0]}-${dateParts[1]}`;
-    });
-
-  return Object.keys(travelsByMonth)
-    .sort()
-    .map((key) => {
-      return { month: key, travelCount: travelsByMonth[key].length };
-    });
+function getMonthFromCreationDate(entity) {
+  const dateParts = entity.creationDate.value.split('-');
+  return `${dateParts[0]}-${dateParts[1]}`;
 }
 
-async function getTravelsByYear() {
+function getDayFromCreationDate(entity) {
+  return entity.creationDate.value;
+}
+
+function getPeriodFromCreationDate(period, entity) {
+  switch (period) {
+    case 'day':
+      return getDayFromCreationDate(entity);
+
+    case 'month':
+      return getMonthFromCreationDate(entity);
+
+    case 'year':
+      return getYearFromCreationDate(entity);
+
+    default:
+      throw { code: 400, message: MESSAGES.INVALID_PERIOD };
+  }
+}
+
+//TRAVELS
+async function getTravelsSummary(period) {
   let travels = await Orion.getEntities({
     type: ORION.ENTITY_TYPE_TRAVEL,
   });
 
   let travelsByYear = travels
     .filter((t) => t.creationDate)
-    .groupBy((t) => {
-      const dateParts = t.creationDate.value.split('-');
-      return dateParts[0];
-    });
+    .groupBy((t) => getPeriodFromCreationDate(period, t));
 
   return Object.keys(travelsByYear)
     .sort()
     .map((key) => {
-      return { year: key, travelCount: travelsByYear[key].length };
+      return { [period]: key, count: travelsByYear[key].length };
     });
 }
 
-async function getTravelsSummary(period) {
-  switch (period) {
-    case 'day':
-      return await getTravelsByDay();
-
-    case 'month':
-      return await getTravelsByMonth();
-
-    case 'year':
-      return await getTravelsByYear();
-
-    default:
-      throw { code: 400, message: MESSAGES.INVALID_PERIOD };
-  }
-}
-
-async function getUsersByDay() {
-  let users = await Orion.getEntities({
-    type: ORION.ENTITY_TYPE_USER,
-  });
-
-  let registersByDay = users
-    .filter((u) => u.creationDate)
-    .groupBy((u) => {
-      const dateParts = u.creationDate.value.split('-');
-      return `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`;
-    });
-
-  return Object.keys(registersByDay)
-    .sort()
-    .map((key) => {
-      return { day: key, usersCount: registersByDay[key].length };
-    });
-}
-
-async function getUsersByMonth() {
-  let users = await Orion.getEntities({
-    type: ORION.ENTITY_TYPE_USER,
-  });
-
-  let registersByMonth = users
-    .filter((u) => u.creationDate)
-    .groupBy((u) => {
-      const dateParts = u.creationDate.value.split('-');
-      return `${dateParts[0]}-${dateParts[1]}`;
-    });
-
-  return Object.keys(registersByMonth)
-    .sort()
-    .map((key) => {
-      return { month: key, userCount: registersByMonth[key].length };
-    });
-}
-
-async function getUsersByYear() {
-  let users = await Orion.getEntities({
-    type: ORION.ENTITY_TYPE_USER,
-  });
-
-  let registersByYear = users
-    .filter((u) => u.creationDate)
-    .groupBy((t) => {
-      const dateParts = t.creationDate.value.split('-');
-      return dateParts[0];
-    });
-
-  return Object.keys(registersByYear)
-    .sort()
-    .map((key) => {
-      return { year: key, userCount: registersByYear[key].length };
-    });
-}
-
+//USERS
 async function getUsersSummary(period) {
-  switch (period) {
-    case 'day':
-      return await getUsersByDay();
+  let users = await Orion.getEntities({
+    type: ORION.ENTITY_TYPE_USER,
+  });
 
-    case 'month':
-      return await getUsersByMonth();
+  let registers = users
+    .filter((u) => u.creationDate)
+    .groupBy((u) => getPeriodFromCreationDate(period, u));
 
-    case 'year':
-      return await getUsersByYear();
+  return Object.keys(registers)
+    .sort()
+    .map((key) => {
+      return { [period]: key, count: registers[key].length };
+    });
+}
+
+//EXPENSES
+async function getExpenses() {
+  let travels = await Orion.getEntities({
+    type: ORION.ENTITY_TYPE_TRAVEL,
+    attribute: ORION.ATTRIBUTE_NAME_EXPENSES,
+  });
+
+  return travels.reduce(
+    (previous, current) => previous.concat(current.expenses.value),
+    []
+  );
+}
+
+async function getExpensesByCategory() {
+  let expenses = (await getExpenses())
+    .filter((e) => e.category)
+    .groupBy((e) => e.category.value);
+
+  return Object.keys(expenses)
+    .sort()
+    .map((key) => {
+      return { category: key, count: expenses[key].length };
+    });
+}
+
+async function getExpensesByPaymentMethod() {
+  let expenses = (await getExpenses())
+    .filter((e) => e.paymentMethod)
+    .groupBy((e) => e.paymentMethod.value);
+
+  return Object.keys(expenses)
+    .sort()
+    .map((key) => {
+      return { paymentMethod: key, count: expenses[key].length };
+    });
+}
+
+async function getExpensesByPeriod(period) {
+  let expenses = (await getExpenses())
+    .filter((e) => e.creationDate)
+    .groupBy((e) => getPeriodFromCreationDate(period, e));
+
+  return Object.keys(expenses)
+    .sort()
+    .map((key) => {
+      return { [period]: key, count: expenses[key].length };
+    });
+}
+
+async function getExpensesSummary(group, period) {
+  switch (group) {
+    case 'date':
+      return await getExpensesByPeriod(period);
+
+    case 'category':
+      return await getExpensesByCategory();
+
+    case 'paymentMethod':
+      return await getExpensesByPaymentMethod();
 
     default:
-      throw { code: 400, message: MESSAGES.INVALID_PERIOD };
+      throw { code: 400, message: MESSAGES.INVALID_GROUP };
   }
 }
 
 module.exports = {
   getTravelsSummary,
   getUsersSummary,
+  getExpensesSummary,
 };

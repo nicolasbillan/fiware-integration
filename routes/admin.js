@@ -19,4 +19,11 @@ router.get('/users', async function (req, res, next) {
     .catch((error) => res.status(error.code ?? 500).send(error.message));
 });
 
+/* GET expenses summary */
+router.get('/expenses', async function (req, res, next) {
+  return Admin.getExpensesSummary(req.query.group, req.query.period)
+    .then((result) => res.json(result))
+    .catch((error) => res.status(error.code ?? 500).send(error.message));
+});
+
 module.exports = router;

@@ -2,6 +2,7 @@ const MESSAGES = {
   CONTEXT_BROKER_CONNECTION_ERROR: 'Context-Broker Connection Error',
   IDENTITY_MANAGER_CONNECTION_ERROR: 'Identity-Manager Connection Error',
   INVALID_PERIOD: 'Invalid Period',
+  INVALID_GROUP: 'Invalid Group',
   TRAVEL_NOT_FOUND: 'Travel Not Found',
   TRAVEL_CREATED: 'Travel Created',
   TRAVEL_UPDATED: 'Travel Updated',
