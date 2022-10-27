@@ -4,6 +4,10 @@ const Parser = require('../parsers/orion');
 const { MESSAGES } = require('../constants/messages');
 const { ORION } = require('../constants/orion');
 
+//TODO: business validations:
+//travel: startDate < endDate
+//expense: date within travel dates?
+//
 //TRAVELS
 
 async function getTravel(id, user) {

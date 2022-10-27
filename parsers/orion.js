@@ -5,14 +5,6 @@ function generateId() {
   return crypto.randomUUID();
 }
 
-//TODO: TESTING ONLY
-function randomDate(start, end) {
-  return new Date(
-    start.getTime() + Math.random() * (end.getTime() - start.getTime())
-  );
-}
-//TODO: TESTING ONLY
-
 //Turns Orion API format into ours
 function parseTravel(travel) {
   return {
@@ -180,6 +172,13 @@ function formatExpense(expense) {
     };
   }
 
+  if (expense.creationDate) {
+    formatted.creationDate = {
+      type: ORION.ATTRIBUTE_TYPE_DATE,
+      value: expense.creationDate,
+    };
+  }
+
   return formatted;
 }
 
@@ -198,6 +197,7 @@ function createExpense() {
     currency: ORION.DEFAULT_STRING,
     category: ORION.DEFAULT_STRING,
     paymentMethod: ORION.DEFAULT_STRING,
+    creationDate: new Date().toISOString().split('T')[0],
   };
 }
 
