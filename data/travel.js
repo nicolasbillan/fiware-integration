@@ -138,23 +138,23 @@ function mergeExpense(oldAttributes, newAttributes) {
     id: oldAttributes.id,
     type: oldAttributes.type,
     title: !newAttributes.title
-      ? oldAttributes.title.value
+      ? oldAttributes.title?.value
       : newAttributes.title,
     amount: !newAttributes.amount
-      ? oldAttributes.amount.value
+      ? oldAttributes.amount?.value
       : newAttributes.amount,
-    date: !newAttributes.date ? oldAttributes.date.value : newAttributes.date,
+    date: !newAttributes.date ? oldAttributes.date?.value : newAttributes.date,
     location: !newAttributes.location
-      ? oldAttributes.location.value
+      ? oldAttributes.location?.value
       : newAttributes.location,
     currency: !newAttributes.currency
-      ? oldAttributes.currency.value
+      ? oldAttributes.currency?.value
       : newAttributes.currency,
     category: !newAttributes.category
-      ? oldAttributes.category.value
+      ? oldAttributes.category?.value
       : newAttributes.category,
     paymentMethod: !newAttributes.paymentMethod
-      ? oldAttributes.paymentMethod.value
+      ? oldAttributes.paymentMethod?.value
       : newAttributes.paymentMethod,
   };
 }
