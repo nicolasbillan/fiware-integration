@@ -4,6 +4,7 @@ var jwt = require('jsonwebtoken');
 
 const Keyrock = require('../helpers/keyrock');
 const Users = require('../data/users');
+const { formatResponse } = require('../parsers/apiResponse');
 const { MESSAGES } = require('../constants/messages');
 
 async function createToken(token, email) {
@@ -16,7 +17,9 @@ async function createToken(token, email) {
 router.get('/:email', async function (req, res) {
   return Users.getUserByEmail(req.params.email)
     .then((result) => res.json(result))
-    .catch((error) => res.status(error.code).send(error.message));
+    .catch((error) =>
+      res.status(error.code).json(formatResponse(error.message))
+    );
 });
 
 router.post('/login', async function (req, res) {
@@ -24,7 +27,9 @@ router.post('/login', async function (req, res) {
     .then((result) =>
       createToken(result, req.body.email).then((result) => res.json(result))
     )
-    .catch((error) => res.status(error.code ?? 500).send(error.message));
+    .catch((error) =>
+      res.status(error.code ?? 500).json(formatResponse(error.message))
+    );
 });
 
 router.post('/register', async function (req, res) {
@@ -32,7 +37,9 @@ router.post('/register', async function (req, res) {
     .then(() => {
       res.send();
     })
-    .catch((error) => res.status(error.code ?? 500).send(error.message));
+    .catch((error) =>
+      res.status(error.code ?? 500).json(formatResponse(error.message))
+    );
 });
 
 module.exports = router;
