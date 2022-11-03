@@ -2,8 +2,18 @@ var express = require('express');
 var router = express.Router();
 
 const Admin = require('../data/admin');
+const Keyrock = require('../helpers/keyrock');
+const { formatResponse } = require('../parsers/apiResponse');
 //TODO: const adminAuth = require('../middleware/adminAuth');
-const { MESSAGES } = require('../constants/messages');
+
+router.post('/login', async function (req, res, next) {
+  return Keyrock.getToken(req.body.email, req.body.password)
+    .then(() => Admin.validateAdmin(req.body.email))
+    .then(() => res.send())
+    .catch((error) =>
+      res.status(error.code ?? 500).json(formatResponse(error.message))
+    );
+});
 
 /* GET travels summary */
 router.get('/travels', async function (req, res, next) {

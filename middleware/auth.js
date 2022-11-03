@@ -13,12 +13,9 @@ async function auth(req, res, next) {
     }
 
     try {
-      //  decript token
       let tokenObject = jwt.verify(token, config.SECRET_KEY);
 
-      //  validate token
-      await Keyrock.validateToken(tokenObject.token).then((res) => {
-        // add userid to req
+      await Keyrock.validateToken(tokenObject.token).then(() => {
         req.params.userId = tokenObject.id;
         next();
       });
