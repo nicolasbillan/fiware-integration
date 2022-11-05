@@ -1,4 +1,5 @@
 const ORION = {
+  API_URL: 'http://localhost:1026/v2/',
   ENTITIES_CONTROLLER: 'entities',
   ATTRIBUTES_CONTROLLER: 'attrs',
   ENTITY_TYPE_TRAVEL: 'Travel',

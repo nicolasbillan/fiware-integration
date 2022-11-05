@@ -11,6 +11,7 @@ function parseTravel(travel) {
     id: travel.id,
     title: travel.title?.value,
     budget: travel.budget?.value,
+    currency: travel.currency?.value,
     startDate: travel.startDate?.value,
     endDate: travel.endDate?.value,
     expenses: travel.expenses.value.map((e) => parseExpense(e)),
@@ -47,6 +48,13 @@ function formatTravel(travel) {
     formatted.budget = {
       type: ORION.ATTRIBUTE_TYPE_NUMBER,
       value: travel.budget,
+    };
+  }
+
+  if (travel.currency) {
+    formatted.currency = {
+      type: ORION.ATTRIBUTE_TYPE_STRING,
+      value: travel.currency,
     };
   }
 
@@ -89,6 +97,7 @@ function createTravel() {
     user: ORION.DEFAULT_STRING,
     title: ORION.DEFAULT_STRING,
     budget: 0,
+    currency: ORION.DEFAULT_STRING,
     startDate: ORION.DEFAULT_DATE,
     endDate: ORION.DEFAULT_DATE,
     expenses: [],
