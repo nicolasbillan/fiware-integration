@@ -2,8 +2,6 @@ const axios = require('axios').default;
 const { MESSAGES } = require('../constants/messages');
 const { ORION } = require('../constants/orion');
 
-const ORION_LOCAL_API_URL = 'http://localhost:1026/v2/';
-
 function handleException(e) {
   throw {
     code: e.response?.status ?? 500,
@@ -13,7 +11,7 @@ function handleException(e) {
 
 async function getEntity(id) {
   return axios
-    .get(`${ORION_LOCAL_API_URL}${ORION.ENTITIES_CONTROLLER}/${id}`)
+    .get(`${ORION.API_URL}${ORION.ENTITIES_CONTROLLER}/${id}`)
     .then((res) => {
       return res.data;
     })
@@ -23,7 +21,7 @@ async function getEntity(id) {
 async function getAttribute(id, attribute) {
   return axios
     .get(
-      `${ORION_LOCAL_API_URL}${ORION.ENTITIES_CONTROLLER}/${id}/${ORION.ATTRIBUTES_CONTROLLER}/${attribute}`
+      `${ORION.API_URL}${ORION.ENTITIES_CONTROLLER}/${id}/${ORION.ATTRIBUTES_CONTROLLER}/${attribute}`
     )
     .then((res) => {
       return res.data;
@@ -36,7 +34,7 @@ async function getEntities(parameters) {
     throw { code: 400, message: 'Type filter missing' };
   }
 
-  let url = `${ORION_LOCAL_API_URL}${ORION.ENTITIES_CONTROLLER}?type=${parameters.type}`;
+  let url = `${ORION.API_URL}${ORION.ENTITIES_CONTROLLER}?type=${parameters.type}`;
 
   if (parameters.attribute) {
     url += `&attrs=${parameters.attribute}`;
@@ -61,7 +59,7 @@ async function getEntities(parameters) {
 
 async function createEntity(body) {
   return axios
-    .post(`${ORION_LOCAL_API_URL}${ORION.ENTITIES_CONTROLLER}`, body)
+    .post(`${ORION.API_URL}${ORION.ENTITIES_CONTROLLER}`, body)
     .then((res) => {
       console.log(`statusCode: ${res.status}`);
     })
@@ -71,7 +69,7 @@ async function createEntity(body) {
 async function updateEntity(id, body) {
   return axios
     .post(
-      `${ORION_LOCAL_API_URL}${ORION.ENTITIES_CONTROLLER}/${id}/${ORION.ATTRIBUTES_CONTROLLER}`,
+      `${ORION.API_URL}${ORION.ENTITIES_CONTROLLER}/${id}/${ORION.ATTRIBUTES_CONTROLLER}`,
       body
     )
     .then((res) => {
@@ -83,7 +81,7 @@ async function updateEntity(id, body) {
 async function updateAttribute(id, attribute, body) {
   await axios
     .put(
-      `${ORION_LOCAL_API_URL}${ORION.ENTITIES_CONTROLLER}/${id}/${ORION.ATTRIBUTES_CONTROLLER}/${attribute}`,
+      `${ORION.API_URL}${ORION.ENTITIES_CONTROLLER}/${id}/${ORION.ATTRIBUTES_CONTROLLER}/${attribute}`,
       body
     )
     .then((res) => {
@@ -94,7 +92,7 @@ async function updateAttribute(id, attribute, body) {
 
 async function deleteEntity(id) {
   return axios
-    .delete(`${ORION_LOCAL_API_URL}${ORION.ENTITIES_CONTROLLER}/${id}`)
+    .delete(`${ORION.API_URL}${ORION.ENTITIES_CONTROLLER}/${id}`)
     .then((res) => {
       console.log(`statusCode: ${res.status}`);
     })

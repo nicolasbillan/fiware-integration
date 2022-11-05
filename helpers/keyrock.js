@@ -3,8 +3,6 @@ const { KEYROCK_ADMIN_USER, KEYROCK_ADMIN_PASSWORD } = require('../config');
 const { MESSAGES } = require('../constants/messages');
 const { KEYROCK } = require('../constants/keyrock');
 
-
-const KEYROCK_API_URL = 'http://localhost:3000/v1/';
 function handleException(e) {
   throw {
     code: e.response?.status ?? 500,
@@ -15,7 +13,7 @@ function handleException(e) {
 
 async function adminLogin() {
   return axios
-    .post(`${KEYROCK_API_URL}${KEYROCK.TOKENS_CONTROLLER}`, {
+    .post(`${KEYROCK.API_URL}${KEYROCK.TOKENS_CONTROLLER}`, {
       name: KEYROCK_ADMIN_USER,
       password: KEYROCK_ADMIN_PASSWORD,
     })
@@ -27,7 +25,7 @@ async function adminLogin() {
 
 async function getToken(username, password) {
   return axios
-    .post(`${KEYROCK_API_URL}${KEYROCK.TOKENS_CONTROLLER}`, {
+    .post(`${KEYROCK.API_URL}${KEYROCK.TOKENS_CONTROLLER}`, {
       name: username,
       password: password,
     })
@@ -45,7 +43,7 @@ async function getToken(username, password) {
 
 async function validateToken(token) {
   return axios
-    .post(`${KEYROCK_API_URL}${KEYROCK.TOKENS_CONTROLLER}`, { token: token })
+    .post(`${KEYROCK.API_URL}${KEYROCK.TOKENS_CONTROLLER}`, { token: token })
     .then((res) => {
       /* TODO: store token in app lifetime */
       return {
@@ -61,7 +59,7 @@ function getUsers() {
     .then((res) => {
       let headers = {};
       headers[KEYROCK.TOKEN_REQUEST_HEADER] = token;
-      return axios.get(`${KEYROCK_API_URL}${KEYROCK_USERS_CONTROLLER}`, {
+      return axios.get(`${KEYROCK.API_URL}${KEYROCK_USERS_CONTROLLER}`, {
         headers,
       });
     })
@@ -76,7 +74,7 @@ async function createUser(user) {
   return await adminLogin()
     .then((res) =>
       axios.post(
-        `${KEYROCK_API_URL}${KEYROCK.USERS_CONTROLLER}`,
+        `${KEYROCK.API_URL}${KEYROCK.USERS_CONTROLLER}`,
         formatUser(user),
         { headers: { [`${KEYROCK.TOKEN_REQUEST_HEADER}`]: res } }
       )
