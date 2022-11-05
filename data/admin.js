@@ -1,5 +1,6 @@
 const groupBy = require('core-js');
 const Orion = require('../helpers/orion');
+const { KEYROCK_ADMIN_USER } = require('../config');
 const { MESSAGES } = require('../constants/messages');
 const { ORION } = require('../constants/orion');
 
@@ -133,8 +134,16 @@ async function getExpensesSummary(group, period) {
   }
 }
 
+//LOGIN
+async function validateAdmin(username) {
+  if (username != KEYROCK_ADMIN_USER) {
+    throw { code: 404, message: MESSAGES.UNAUTHORIZED };
+  }
+}
+
 module.exports = {
   getTravelsSummary,
   getUsersSummary,
   getExpensesSummary,
+  validateAdmin,
 };

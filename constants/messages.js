@@ -1,6 +1,7 @@
 const MESSAGES = {
   CONTEXT_BROKER_CONNECTION_ERROR: 'Context-Broker Connection Error',
   IDENTITY_MANAGER_CONNECTION_ERROR: 'Identity-Manager Connection Error',
+  UNAUTHORIZED: 'Unauthorized',
   INVALID_PERIOD: 'Invalid Period',
   INVALID_GROUP: 'Invalid Group',
   //TRAVEL_NOT_FOUND: 'Travel Not Found',

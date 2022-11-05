@@ -3,8 +3,8 @@ const { KEYROCK_ADMIN_USER, KEYROCK_ADMIN_PASSWORD } = require('../config');
 const { MESSAGES } = require('../constants/messages');
 const { KEYROCK } = require('../constants/keyrock');
 
-const KEYROCK_API_URL = 'http://localhost:3000/v1/';
 
+const KEYROCK_API_URL = 'http://localhost:3000/v1/';
 function handleException(e) {
   throw {
     code: e.response?.status ?? 500,
